@@ -143,7 +143,7 @@ const SideLeft = () => (
       </svg>
     </a>
     {/* Instagram */}
-    <a href="#" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <a href="https://www.instagram.com/otarcyland?igsh=MTZiY2M4aGpoa3lncg==" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
@@ -249,7 +249,7 @@ const Hero = () => (
         fontWeight: 300,
       }}
     >
-      Création de landing pages professionnelles
+      Vous ne serez plus jamais invisible
     </p>
   </section>
 );
@@ -608,8 +608,8 @@ const Contact = () => {
   };
 
   const contactDetails = [
-    { label: "Adresse", value: "Paris, France" },
-    { label: "Téléphone", value: "+33 6 XX XX XX XX" },
+    { label: "Adresse", value: "Bordeaux, France" },
+    { label: "Téléphone", value: "+33 7 82 07 16 54" },
     { label: "E-mail", value: "contact@otarcy.com" },
   ];
 
