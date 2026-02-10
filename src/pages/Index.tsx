@@ -255,10 +255,10 @@ const Hero = () => (
 );
 
 // ─── SECTION 02 — SERVICES ────────────────────────────
-const mockProjects = [
-  { title: "RESTAURANT & CAFÉ", sub: "Landing page + SEO", tags: ["Responsive", "Formulaire", "SEO"] },
-  { title: "CABINET MÉDICAL", sub: "Site vitrine complet", tags: ["Mobile-first", "Hébergement", "Support"] },
-  { title: "AGENCE IMMOBILIÈRE", sub: "Page de conversion", tags: ["CTA optimisé", "Rapide", "Moderne"] },
+const mockProjects: Project[] = [ 
+  { title: "", sub: "", tags: [] },
+  { title: "", sub: "", tags: [] },
+  { title: "", sub: "", tags: [] },
 ];
 
 interface Project {
@@ -268,96 +268,31 @@ interface Project {
 }
 
 const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => (
-  <div className="reveal" style={{ transitionDelay: `${index * 0.12}s` }}>
-    <div
-      style={{
-        background: "#1c1c1c",
-        borderRadius: "4px",
-        overflow: "hidden",
-        position: "relative",
-        aspectRatio: "4/3",
-        cursor: "pointer",
-        border: "1px solid rgba(255,255,255,0.04)",
-        transition: "transform 0.4s cubic-bezier(.22,1,.36,1), border-color 0.4s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-4px)";
-        e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.06,
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "24px",
-          background: "linear-gradient(transparent, rgba(15,15,15,0.9))",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "'Raleway', sans-serif",
-            fontSize: "0.6rem",
-            letterSpacing: "0.2em",
-            color: "#7a7a7a",
-            marginBottom: "6px",
-          }}
-        >
-          {project.sub}
-        </p>
-        <h3
-          style={{
-            fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: "1.35rem",
-            letterSpacing: "0.08em",
-            color: "#f0f0f0",
-          }}
-        >
-          {project.title}
-        </h3>
-      </div>
+    <div className="reveal" style={{ 
+      transitionDelay: `${index * 0.12}s`, 
+      marginBottom: "60px", // Un peu plus d'espace entre les titres
+      textAlign: "left"
+    }}>
+      <p style={{ 
+        fontFamily: "'Raleway', sans-serif", 
+        fontSize: "0.6rem", 
+        letterSpacing: "0.2em",
+        color: "#7a7a7a",
+        marginBottom: "8px",
+        textTransform: "uppercase"
+      }}>
+        {project.sub}
+      </p>
+      <h3 style={{ 
+        fontFamily: "'Bebas Neue', sans-serif", 
+        fontSize: "1.8rem", // On grossit un peu le titre comme il n'y a plus de cadre
+        letterSpacing: "0.05em",
+        color: "#f0f0f0" 
+      }}>
+        {project.title}
+      </h3>
     </div>
-    <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-      {project.tags.map((tag) => (
-        <span
-          key={tag}
-          style={{
-            fontFamily: "'Raleway', sans-serif",
-            fontSize: "0.6rem",
-            letterSpacing: "0.15em",
-            color: "#4a4a4a",
-            textTransform: "uppercase",
-            fontWeight: 500,
-          }}
-        >
-          {tag}
-        </span>
-      ))}
-    </div>
-  </div>
-);
+  );
 
 const offerItems = [
   "Responsive (mobile, tablette, desktop)",
