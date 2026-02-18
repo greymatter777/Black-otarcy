@@ -97,3 +97,31 @@ textarea {
   opacity: 1;
   transform: translateY(0);
 }
+/* Adaptations pour Mobile */
+@media (max-width: 768px) {
+  /* Réduire la taille des gros titres */
+  h1, .otarcytitle { 
+    font-size: 3rem !important; 
+  }
+
+  h2, h3 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Passer les colonnes les unes sous les autres */
+  .contact-container, .services-grid {
+    flex-direction: column !important;
+    padding: 20px !important;
+  }
+
+  /* Ajuster le formulaire */
+  input, textarea {
+    width: 100% !important;
+    font-size: 14px !important;
+  }
+
+  /* Masquer ou déplacer les éléments fixes encombrants (SideLeft/SideRight) */
+  .side-elements {
+    display: none; 
+  }
+}

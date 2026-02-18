@@ -549,8 +549,8 @@ const Contact = () => {
   ];
 
   const fields = [
-    { label: "Votre nom", name: "name" as keyof FormData, type: "text", placeholder: "Jean Dupont", required: true },
-    { label: "Votre email", name: "email" as keyof FormData, type: "email", placeholder: "jean@entreprise.com", required: true },
+    { label: "Votre nom", name: "name" as keyof FormData, type: "text", placeholder: "Anthony Dupont", required: true },
+    { label: "Votre email", name: "email" as keyof FormData, type: "email", placeholder: "anthony@entreprise.com", required: true },
     { label: "Téléphone", name: "phone" as keyof FormData, type: "tel", placeholder: "+33 6 XX XX XX XX", required: false },
   ];
 
