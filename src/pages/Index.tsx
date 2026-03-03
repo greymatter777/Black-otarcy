@@ -967,11 +967,15 @@ const Index = () => {
       }
 
       const data = await res.json();
-      setResults(data);
+      setResults(data); 
+      
+      setTimeout(() => {
+        document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
 
       const resultsSection = document.getElementById("results");
       if (resultsSection) {
-        resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      
       }
     } catch (error) {
       console.error("Erreur lors de l'audit de marque:", error);
