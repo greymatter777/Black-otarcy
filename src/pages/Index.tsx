@@ -179,7 +179,7 @@ const SideRight = () => (
 );
 
 // ─── SECTION 01 — HERO ────────────────────────────────
-const Hero = () => (
+const Hero: React.FC<any> = ({ setBrandName, handleAudit, loading }) => (
   <section
     style={{
       minHeight: "100vh",
@@ -251,6 +251,58 @@ const Hero = () => (
     >
       Contrôlez ce que l'IA dit de votre marque
     </p>
+
+    {/* Champ de saisie de la marque */}
+    <div
+      className="reveal"
+      style={{
+        marginTop: "32px",
+        display: "flex",
+        gap: "12px",
+        alignItems: "center",
+        justifyContent: "center",
+        maxWidth: "520px",
+        width: "100%",
+      }}
+    >
+      <input
+        type="text"
+        placeholder="Entrez le nom de votre marque"
+        onChange={(e) => setBrandName(e.target.value)}
+        style={{
+          flex: 1,
+          background: "transparent",
+          border: "1px solid #4a4a4a",
+          padding: "10px 14px",
+          color: "#f0f0f0",
+          fontFamily: "'Raleway', sans-serif",
+          fontSize: "0.78rem",
+          letterSpacing: "0.08em",
+          outline: "none",
+        }}
+      />
+      <button
+        onClick={handleAudit}
+        disabled={loading}
+        style={{
+          fontFamily: "'Raleway', sans-serif",
+          fontSize: "0.66rem",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          padding: "10px 18px",
+          borderRadius: "2px",
+          border: "none",
+          cursor: loading ? "not-allowed" : "pointer",
+          background: loading ? "#555" : "#e8e8e8",
+          color: "#0f0f0f",
+          transition: "background 0.25s, transform 0.2s, opacity 0.2s",
+          opacity: loading ? 0.7 : 1,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {loading ? "ANALYSE EN COURS..." : "Lancer le diagnostic"}
+      </button>
+    </div>
   </section>
 );
 
@@ -770,8 +822,164 @@ const Contact = () => {
   );
 };
 
+// ─── AUDIT RESULTS ────────────────────────────────────
+const AuditResults: React.FC<{ results: any }> = ({ results }) => {
+  const gptText =
+    results?.openai?.summary ??
+    results?.openai?.raw ??
+    "Aucun résultat disponible.";
+  const claudeText =
+    results?.anthropic?.summary ??
+    results?.anthropic?.raw ??
+    "Aucun résultat disponible.";
+
+  const extractScore = (text: string | null | undefined) => {
+    if (!text) return null;
+    const match = text.match(/(\d{1,2})\s*\/\s*10/);
+    if (!match) return null;
+    return `${match[1]}/10`;
+  };
+
+  const gptScore =
+    results?.openai?.score != null
+      ? `${results.openai.score}/10`
+      : extractScore(gptText) ?? "—/10";
+  const claudeScore =
+    results?.anthropic?.score != null
+      ? `${results.anthropic.score}/10`
+      : extractScore(claudeText) ?? "—/10";
+
+  return (
+    <section
+      id="results"
+      className="reveal py-20 animate-in fade-in slide-in-from-bottom-4"
+      style={{ padding: "40px 60px", background: "#0f0f0f" }}
+    >
+      <div className="max-w-5xl mx-auto">
+        <h2
+          className="mb-8"
+          style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "clamp(2rem, 4vw, 3rem)",
+            letterSpacing: "0.08em",
+            color: "#f0f0f0",
+          }}
+        >
+          Résultats de l'audit IA
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* GPT-4 Card */}
+          <div className="bg-white/5 border border-white/10 rounded-lg p-8 flex flex-col gap-4">
+            <div className="flex items-baseline justify-between">
+              <h3
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: "1.6rem",
+                  letterSpacing: "0.08em",
+                  color: "#f0f0f0",
+                }}
+              >
+                GPT-4
+              </h3>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: "2.6rem",
+                  letterSpacing: "0.06em",
+                  color: "#e8e8e8",
+                }}
+              >
+                {gptScore}
+              </span>
+            </div>
+            <p
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.85rem",
+                color: "#d4d4d4",
+                lineHeight: 1.8,
+              }}
+            >
+              {gptText}
+            </p>
+          </div>
+
+          {/* Claude 3.5 Card */}
+          <div className="bg-white/5 border border-white/10 rounded-lg p-8 flex flex-col gap-4">
+            <div className="flex items-baseline justify-between">
+              <h3
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: "1.6rem",
+                  letterSpacing: "0.08em",
+                  color: "#f0f0f0",
+                }}
+              >
+                Claude 3.5
+              </h3>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: "2.6rem",
+                  letterSpacing: "0.06em",
+                  color: "#e8e8e8",
+                }}
+              >
+                {claudeScore}
+              </span>
+            </div>
+            <p
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.85rem",
+                color: "#d4d4d4",
+                lineHeight: 1.8,
+              }}
+            >
+              {claudeText}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ─── PAGE EXPORT ──────────────────────────────────────
 const Index = () => {
+  const [brandName, setBrandName] = useState<string>("");
+  const [results, setResults] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleAudit = async () => {
+    if (!brandName) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand: brandName }),
+      });
+
+      if (!res.ok) {
+        console.error("Erreur HTTP API audit:", res.status, await res.text());
+        throw new Error("Réponse non valide de l'API d'audit.");
+      }
+
+      const data = await res.json();
+      setResults(data);
+
+      const resultsSection = document.getElementById("results");
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'audit de marque:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useReveal();
 
   return (
@@ -779,7 +987,8 @@ const Index = () => {
       <Navbar />
       <SideLeft />
       <SideRight />
-      <Hero />
+      <Hero setBrandName={setBrandName} handleAudit={handleAudit} loading={loading} />
+      {results && <AuditResults results={results} />}
       <Services />
       <Contact />
     </div>
