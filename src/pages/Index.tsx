@@ -220,7 +220,7 @@ const Hero = () => (
         fontWeight: 500,
       }}
     >
-      Agence de création web
+      AIO Brand Audit
     </p>
 
     <h1
@@ -249,7 +249,7 @@ const Hero = () => (
         fontWeight: 300,
       }}
     >
-      Vous ne serez plus jamais invisible
+      Contrôlez ce que l'IA dit de votre marque
     </p>
   </section>
 );
