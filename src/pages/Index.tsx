@@ -954,6 +954,8 @@ const Index = () => {
   const handleAudit = async () => {
     if (!brandName) return;
     setLoading(true);
+    setResults(null);
+
     try {
       const res = await fetch("/api/audit", {
         method: "POST",
@@ -967,16 +969,13 @@ const Index = () => {
       }
 
       const data = await res.json();
-      setResults(data); 
-      
-      setTimeout(() => {
-        document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      setResults(data);
 
-      const resultsSection = document.getElementById("results");
-      if (resultsSection) {
-      
-      }
+      setTimeout(() => {
+        document
+          .getElementById("results")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     } catch (error) {
       console.error("Erreur lors de l'audit de marque:", error);
     } finally {
@@ -992,7 +991,9 @@ const Index = () => {
       <SideLeft />
       <SideRight />
       <Hero setBrandName={setBrandName} handleAudit={handleAudit} loading={loading} />
-      {results && <AuditResults results={results} />}
+      <div id="results">
+        {results && <AuditResults results={results} />}
+      </div>
       <Services />
       <Contact />
     </div>
