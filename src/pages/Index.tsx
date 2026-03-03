@@ -42,6 +42,13 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleNavClick = (targetId: string) => {
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <nav
       style={{
@@ -89,28 +96,26 @@ const Navbar = () => {
 
       {/* Nav links */}
       <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
-        {[
-          { label: "SERVICES", to: "/#services" },
-          { label: "CONTACT", to: "/#contact" },
-        ].map((link) => (
-          <Link
-            key={link.label}
-            to={link.to}
-            style={{
-              fontFamily: "'Raleway', sans-serif",
-              fontSize: "0.7rem",
-              letterSpacing: "0.2em",
-              color: "#7a7a7a",
-              textDecoration: "none",
-              fontWeight: 500,
-              transition: "color 0.3s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
-          >
-            {link.label}
-          </Link>
-        ))}
+        <button
+          type="button"
+          onClick={() => handleNavClick("results")}
+          style={{
+            fontFamily: "'Raleway', sans-serif",
+            fontSize: "0.7rem",
+            letterSpacing: "0.2em",
+            color: "#7a7a7a",
+            textDecoration: "none",
+            fontWeight: 500,
+            transition: "color 0.3s",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+        >
+          AUDIT
+        </button>
       </div>
     </nav>
   );
