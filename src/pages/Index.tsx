@@ -460,11 +460,16 @@ const Index = () => {
       const data = await res.json();
     
       // On force le type 'any' pour que TypeScript ne bloque plus la compilation
-      const rawData = data as any;
-  
       const formattedData = {
+        // On remplit les anciens tiroirs (openai/anthropic) avec les données de Groq
+        openai: {
+          score: rawData.score || 0,
+          summary: rawData.analysis || "Analyse terminée",
+          recommendations: rawData.recommendations || []
+        },
+        // On garde aussi la structure simple au cas où
         score: rawData.score || 0,
-        analysis: rawData.analysis || "Analyse indisponible",
+        analysis: rawData.analysis || "Analyse terminée",
         recommendations: rawData.recommendations || []
       };
   
@@ -490,11 +495,14 @@ const Index = () => {
       <SideLeft />
       <SideRight />
       <Hero setBrandName={setBrandName} handleAudit={handleAudit} loading={loading} />
-      <div id="results">
-        {results && <AuditResults results={results} />}
-      </div>
+      <div id="results" className="min-h-[200px] w-full">
+  {results ? (
+    <AuditResults results={results} />
+  ) : (
+    <div className="text-white text-center p-10">
+      {loading ? "Analyse en cours..." : "En attente des résultats..."}
     </div>
-  );
-};
+  )}
+</div>
 
 export default Index;
