@@ -1,48 +1,75 @@
-import { Groq } from "groq-sdk";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: Request) {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Autorisé seulement en POST' }), { status: 405 });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  try {
-    const { brand } = await req.json();
-    const key = process.env.GROQ_API_KEY;
+  const { brand } = req.body;
 
-    if (!key) {
-      return new Response(JSON.stringify({ error: 'Clé API manquante dans Vercel' }), { status: 500 });
+  if (!brand || typeof brand !== "string" || brand.trim().length === 0) {
+    return res.status(400).json({ error: "Le nom de la marque est requis." });
+  }
+
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "Clé API Groq manquante côté serveur." });
+  }
+
+  const prompt = `Tu es un expert en branding et en stratégie de marque. Effectue un audit complet de la marque "${brand.trim()}".
+
+Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement cette structure :
+{
+  "score": <nombre entier de 1 à 10>,
+  "analysis": "<analyse de 3-4 phrases sur la présence, la notoriété et l'image de la marque>",
+  "strengths": ["<force 1>", "<force 2>", "<force 3>"],
+  "weaknesses": ["<faiblesse 1>", "<faiblesse 2>"],
+  "recommendations": ["<recommandation 1>", "<recommandation 2>", "<recommandation 3>"]
+}`;
+
+  try {
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!groqRes.ok) {
+      const errText = await groqRes.text();
+      console.error("Groq API error:", groqRes.status, errText);
+      return res.status(502).json({ error: "Erreur lors de l'appel à l'IA." });
     }
 
-    const groq = new Groq({ apiKey: key });
+    const groqData = await groqRes.json();
+    const rawContent = groqData.choices?.[0]?.message?.content ?? "";
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: "Tu es un expert marketing. Réponds UNIQUEMENT en JSON valide avec ces clés : score (nombre), analysis (texte), recommendations (tableau de textes)."
-        },
-        {
-          role: "user",
-          content: `Analyse la marque : ${brand}`
-        }
-      ],
-      temperature: 0.2,
-      response_format: { type: "json_object" }
+    let parsed: any;
+    try {
+      // Strip possible markdown fences
+      const clean = rawContent.replace(/```json|```/g, "").trim();
+      parsed = JSON.parse(clean);
+    } catch {
+      console.error("JSON parse error. Raw content:", rawContent);
+      return res.status(500).json({ error: "Réponse IA invalide. Réessayez." });
+    }
+
+    return res.status(200).json({
+      score: parsed.score ?? 0,
+      analysis: parsed.analysis ?? "",
+      strengths: parsed.strengths ?? [],
+      weaknesses: parsed.weaknesses ?? [],
+      recommendations: parsed.recommendations ?? [],
     });
-
-    const content = completion.choices[0]?.message?.content || "{}";
-    
-    return new Response(content, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: 'Erreur interne : ' + error.message }), { status: 500 });
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return res.status(500).json({ error: "Erreur serveur inattendue." });
   }
 }
