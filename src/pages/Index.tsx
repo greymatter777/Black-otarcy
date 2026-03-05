@@ -2,18 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 // ─── HOOK: Scroll Reveal ──────────────────────────────
-function useReveal() {
+function useReveal(deps: any[] = []) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
           if (e.isIntersecting) e.target.classList.add("visible");
         }),
-      { threshold: 0.15 }
+      { threshold: 0.05 }
     );
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 }
 
 // ─── NAV ──────────────────────────────────────────────
@@ -223,8 +224,7 @@ const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
 const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results, brand }) => (
   <section
     id="results"
-    className="reveal"
-    style={{ padding: "80px 60px", background: "#0f0f0f" }}
+    style={{ padding: "80px 60px", background: "#0f0f0f", opacity: 1 }}
   >
     {/* Header */}
     <div style={{ maxWidth: "860px", margin: "0 auto" }}>
@@ -335,7 +335,7 @@ const Index = () => {
     }
   };
 
-  useReveal();
+  useReveal([results]);
 
   return (
     <div style={{ background: "#0f0f0f", minHeight: "100vh" }}>
