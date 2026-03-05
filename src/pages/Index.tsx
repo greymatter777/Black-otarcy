@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  useUser,
-  useClerk,
-  SignedIn,
-  SignedOut,
-} from "@clerk/react";
+import { useUser, useClerk } from "@clerk/react";
 
 // ─── HOOK: Scroll Reveal ──────────────────────────────
 function useReveal(deps: any[] = []) {
@@ -87,7 +82,7 @@ const Navbar = () => {
           AUDIT
         </button>
 
-        <SignedOut>
+        {!user && (
           <button
             type="button"
             onClick={() => openSignIn()}
@@ -108,9 +103,9 @@ const Navbar = () => {
           >
             Connexion
           </button>
-        </SignedOut>
+        )}
 
-        <SignedIn>
+        {user && (
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <button
               type="button"
@@ -150,7 +145,7 @@ const Navbar = () => {
               Déconnexion
             </button>
           </div>
-        </SignedIn>
+        )}
       </div>
     </nav>
   );
