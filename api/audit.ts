@@ -1,4 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -11,6 +17,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Le nom de la marque est requis." });
   }
 
+  // Auth Clerk
+  const clerkUserId = req.headers["x-clerk-user-id"] as string;
+  if (!clerkUserId) {
+    return res.status(401).json({ error: "Vous devez être connecté pour lancer un audit." });
+  }
+
+  // Vérifie le plan et les audits restants
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", clerkUserId)
+    .single();
+
+  if (userError || !user) {
+    return res.status(404).json({ error: "Utilisateur introuvable." });
+  }
+
+  if (user.audits_limit !== -1 && user.audits_used >= user.audits_limit) {
+    return res.status(403).json({ error: "Limite d'audits atteinte. Passez au plan Pro." });
+  }
+
+  // Clé Groq
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: "Clé API Groq manquante côté serveur." });
@@ -53,13 +81,29 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
 
     let parsed: any;
     try {
-      // Strip possible markdown fences
       const clean = rawContent.replace(/```json|```/g, "").trim();
       parsed = JSON.parse(clean);
     } catch {
       console.error("JSON parse error. Raw content:", rawContent);
       return res.status(500).json({ error: "Réponse IA invalide. Réessayez." });
     }
+
+    // Sauvegarde l'audit dans Supabase
+    await supabase.from("audits").insert({
+      user_id: clerkUserId,
+      brand: brand.trim(),
+      score: parsed.score ?? 0,
+      analysis: parsed.analysis ?? "",
+      strengths: parsed.strengths ?? [],
+      weaknesses: parsed.weaknesses ?? [],
+      recommendations: parsed.recommendations ?? [],
+    });
+
+    // Incrémente le compteur d'audits
+    await supabase
+      .from("users")
+      .update({ audits_used: user.audits_used + 1, updated_at: new Date().toISOString() })
+      .eq("id", clerkUserId);
 
     return res.status(200).json({
       score: parsed.score ?? 0,

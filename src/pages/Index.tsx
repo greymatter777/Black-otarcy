@@ -408,7 +408,12 @@ const Index = () => {
 
   useEffect(() => {
     if (isSignedIn && user) {
-      fetch("/api/user-status")
+      fetch("/api/user-status", {
+        headers: {
+          "x-clerk-user-id": user.id,
+          "x-clerk-user-email": user.emailAddresses[0]?.emailAddress ?? "",
+        },
+      })
         .then((r) => r.json())
         .then((d) => setAuditsLeft(d.auditsLeft ?? 3))
         .catch(() => setAuditsLeft(3));
@@ -428,7 +433,11 @@ const Index = () => {
     try {
       const res = await fetch("/api/audit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-clerk-user-id": user?.id ?? "",
+          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
+        },
         body: JSON.stringify({ brand: brandName.trim() }),
       });
 
