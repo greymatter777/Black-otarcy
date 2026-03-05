@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  useUser,
+  useClerk,
+  SignedIn,
+  SignedOut,
+} from "@clerk/react";
 
 // ─── HOOK: Scroll Reveal ──────────────────────────────
 function useReveal(deps: any[] = []) {
@@ -13,13 +19,15 @@ function useReveal(deps: any[] = []) {
     );
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }
 
 // ─── NAV ──────────────────────────────────────────────
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { user } = useUser();
+  const { openSignIn, openUserProfile, signOut } = useClerk();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -57,7 +65,8 @@ const Navbar = () => {
         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#f0f0f0" }}>OT</span>
         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#7a7a7a" }}>AR</span>
       </Link>
-      <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+
+      <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
         <button
           type="button"
           onClick={() => handleNavClick("results")}
@@ -77,6 +86,71 @@ const Navbar = () => {
         >
           AUDIT
         </button>
+
+        <SignedOut>
+          <button
+            type="button"
+            onClick={() => openSignIn()}
+            style={{
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.66rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "7px 16px",
+              border: "1px solid #3a3a3a",
+              background: "transparent",
+              color: "#e8e8e8",
+              cursor: "pointer",
+              transition: "border-color 0.3s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; }}
+          >
+            Connexion
+          </button>
+        </SignedOut>
+
+        <SignedIn>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <button
+              type="button"
+              onClick={() => openUserProfile()}
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.66rem",
+                letterSpacing: "0.15em",
+                color: "#7a7a7a",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+            >
+              {user?.firstName ?? user?.emailAddresses[0]?.emailAddress ?? "Mon compte"}
+            </button>
+            <button
+              type="button"
+              onClick={() => signOut()}
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.6rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#4a4a4a",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+            >
+              Déconnexion
+            </button>
+          </div>
+        </SignedIn>
       </div>
     </nav>
   );
@@ -114,7 +188,14 @@ const SideRight = () => (
 );
 
 // ─── HERO ─────────────────────────────────────────────
-const Hero: React.FC<{ setBrandName: (v: string) => void; handleAudit: () => void; loading: boolean }> = ({ setBrandName, handleAudit, loading }) => (
+const Hero: React.FC<{
+  setBrandName: (v: string) => void;
+  handleAudit: () => void;
+  loading: boolean;
+  isSignedIn: boolean;
+  onSignIn: () => void;
+  auditsLeft: number | null;
+}> = ({ setBrandName, handleAudit, loading, isSignedIn, onSignIn, auditsLeft }) => (
   <section
     style={{
       minHeight: "100vh",
@@ -140,46 +221,82 @@ const Hero: React.FC<{ setBrandName: (v: string) => void; handleAudit: () => voi
     <p className="reveal" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", letterSpacing: "0.25em", color: "#7a7a7a", marginTop: "28px", textTransform: "uppercase", fontWeight: 300 }}>
       Contrôlez ce que l'IA dit de votre marque
     </p>
-    <div className="reveal" style={{ marginTop: "32px", display: "flex", gap: "12px", alignItems: "center", justifyContent: "center", maxWidth: "520px", width: "100%" }}>
-      <input
-        type="text"
-        placeholder="Entrez le nom de votre marque"
-        onChange={(e) => setBrandName(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleAudit()}
-        style={{
-          flex: 1,
-          background: "transparent",
-          border: "1px solid #4a4a4a",
-          padding: "10px 14px",
-          color: "#f0f0f0",
-          fontFamily: "'Raleway', sans-serif",
-          fontSize: "0.78rem",
-          letterSpacing: "0.08em",
-          outline: "none",
-        }}
-      />
-      <button
-        onClick={handleAudit}
-        disabled={loading}
-        style={{
-          fontFamily: "'Raleway', sans-serif",
-          fontSize: "0.66rem",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          padding: "10px 18px",
-          borderRadius: "2px",
-          border: "none",
-          cursor: loading ? "not-allowed" : "pointer",
-          background: loading ? "#555" : "#e8e8e8",
-          color: "#0f0f0f",
-          transition: "background 0.25s, opacity 0.2s",
-          opacity: loading ? 0.7 : 1,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {loading ? "ANALYSE EN COURS..." : "Lancer le diagnostic"}
-      </button>
+
+    {isSignedIn && auditsLeft !== null && (
+      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", color: auditsLeft === 0 ? "#ef4444" : "#7a7a7a", marginTop: "16px", textTransform: "uppercase" }}>
+        {auditsLeft === 0 ? "Limite atteinte — passez au plan Pro" : `${auditsLeft} audit${auditsLeft > 1 ? "s" : ""} restant${auditsLeft > 1 ? "s" : ""}`}
+      </p>
+    )}
+
+    <div className="reveal" style={{ marginTop: "24px", display: "flex", gap: "12px", alignItems: "center", justifyContent: "center", maxWidth: "520px", width: "100%" }}>
+      {isSignedIn ? (
+        <>
+          <input
+            type="text"
+            placeholder="Entrez le nom de votre marque"
+            onChange={(e) => setBrandName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAudit()}
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "1px solid #4a4a4a",
+              padding: "10px 14px",
+              color: "#f0f0f0",
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.78rem",
+              letterSpacing: "0.08em",
+              outline: "none",
+            }}
+          />
+          <button
+            onClick={handleAudit}
+            disabled={loading || auditsLeft === 0}
+            style={{
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.66rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "10px 18px",
+              borderRadius: "2px",
+              border: "none",
+              cursor: (loading || auditsLeft === 0) ? "not-allowed" : "pointer",
+              background: (loading || auditsLeft === 0) ? "#555" : "#e8e8e8",
+              color: "#0f0f0f",
+              transition: "background 0.25s, opacity 0.2s",
+              opacity: (loading || auditsLeft === 0) ? 0.7 : 1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {loading ? "ANALYSE EN COURS..." : "Lancer le diagnostic"}
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={onSignIn}
+          style={{
+            fontFamily: "'Raleway', sans-serif",
+            fontSize: "0.66rem",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            padding: "12px 32px",
+            borderRadius: "2px",
+            border: "none",
+            cursor: "pointer",
+            background: "#e8e8e8",
+            color: "#0f0f0f",
+            transition: "background 0.25s",
+          }}
+        >
+          Créer un compte gratuit
+        </button>
+      )}
     </div>
+
+    {!isSignedIn && (
+      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.15em", color: "#4a4a4a", marginTop: "14px" }}>
+        3 audits offerts — sans carte bancaire
+      </p>
+    )}
   </section>
 );
 
@@ -222,11 +339,7 @@ const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
 
 // ─── AUDIT RESULTS ────────────────────────────────────
 const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results, brand }) => (
-  <section
-    id="results"
-    style={{ padding: "80px 60px", background: "#0f0f0f", opacity: 1 }}
-  >
-    {/* Header */}
+  <section id="results" style={{ padding: "80px 60px", background: "#0f0f0f" }}>
     <div style={{ maxWidth: "860px", margin: "0 auto" }}>
       <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "12px" }}>
         .02 — Résultats
@@ -234,8 +347,6 @@ const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results
       <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "0.06em", color: "#f0f0f0", marginBottom: "48px" }}>
         AUDIT — {brand.toUpperCase()}
       </h2>
-
-      {/* Score + Analysis */}
       <div style={{ display: "flex", gap: "40px", alignItems: "flex-start", marginBottom: "48px", padding: "36px", border: "1px solid #2a2a2a", background: "#161616" }}>
         <ScoreRing score={results.score} />
         <div>
@@ -247,10 +358,7 @@ const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results
           </p>
         </div>
       </div>
-
-      {/* 3 columns */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px" }}>
-        {/* Forces */}
         <div style={{ padding: "28px", border: "1px solid #2a2a2a", background: "#161616" }}>
           <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "16px" }}>Forces</p>
           {results.strengths.map((s, i) => (
@@ -260,8 +368,6 @@ const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results
             </div>
           ))}
         </div>
-
-        {/* Faiblesses */}
         <div style={{ padding: "28px", border: "1px solid #2a2a2a", background: "#161616" }}>
           <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "16px" }}>Faiblesses</p>
           {results.weaknesses.map((w, i) => (
@@ -271,8 +377,6 @@ const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results
             </div>
           ))}
         </div>
-
-        {/* Recommandations */}
         <div style={{ padding: "28px", border: "1px solid #2a2a2a", background: "#161616" }}>
           <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "16px" }}>Recommandations</p>
           {results.recommendations.map((r, i) => (
@@ -302,9 +406,26 @@ const Index = () => {
   const [results, setResults] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [auditsLeft, setAuditsLeft] = useState<number | null>(null);
+
+  const { isSignedIn, user } = useUser();
+  const { openSignIn } = useClerk();
+
+  useEffect(() => {
+    if (isSignedIn && user) {
+      fetch("/api/user-status")
+        .then((r) => r.json())
+        .then((d) => setAuditsLeft(d.auditsLeft ?? 3))
+        .catch(() => setAuditsLeft(3));
+    } else {
+      setAuditsLeft(null);
+    }
+  }, [isSignedIn, user]);
 
   const handleAudit = async () => {
-    if (!brandName.trim()) return;
+    if (!brandName.trim() || !isSignedIn) return;
+    if (auditsLeft === 0) return;
+
     setLoading(true);
     setResults(null);
     setError(null);
@@ -323,6 +444,7 @@ const Index = () => {
       }
 
       setResults(data as AuditData);
+      if (auditsLeft !== null) setAuditsLeft((prev) => (prev !== null ? Math.max(0, prev - 1) : null));
 
       setTimeout(() => {
         const el = document.getElementById("results");
@@ -342,7 +464,14 @@ const Index = () => {
       <Navbar />
       <SideLeft />
       <SideRight />
-      <Hero setBrandName={setBrandName} handleAudit={handleAudit} loading={loading} />
+      <Hero
+        setBrandName={setBrandName}
+        handleAudit={handleAudit}
+        loading={loading}
+        isSignedIn={!!isSignedIn}
+        onSignIn={() => openSignIn()}
+        auditsLeft={auditsLeft}
+      />
       {error && <ErrorBanner message={error} />}
       {results && <AuditResults results={results} brand={brandName} />}
     </div>
