@@ -142,6 +142,22 @@ const Navbar = () => {
             >
               {user?.firstName ?? user?.emailAddresses[0]?.emailAddress ?? "Mon compte"}
             </button>
+            <Link
+              to="/dashboard"
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.66rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#7a7a7a",
+                textDecoration: "none",
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+            >
+              Mes audits
+            </Link>
             <button
               type="button"
               onClick={() => signOut()}
