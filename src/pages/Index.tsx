@@ -510,6 +510,46 @@ const Index = () => {
         auditsLeft={auditsLeft}
       />
       {error && <ErrorBanner message={error} />}
+      {auditsLeft === 0 && !loading && (
+        <div style={{
+          padding: "28px 60px",
+          background: "#161616",
+          borderTop: "1px solid #2a2a2a",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "24px",
+          flexWrap: "wrap",
+        }}>
+          <div>
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.4rem", letterSpacing: "0.08em", color: "#f0f0f0", marginBottom: "4px" }}>
+              LIMITE ATTEINTE
+            </p>
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.75rem", color: "#7a7a7a", fontWeight: 300, letterSpacing: "0.1em" }}>
+              Passez au plan Pro pour des audits illimités
+            </p>
+          </div>
+          <Link
+            to="/pricing"
+            style={{
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.66rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "12px 28px",
+              background: "#e8e8e8",
+              color: "#0f0f0f",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            Passer au Pro →
+          </Link>
+        </div>
+      )}
       {results && <AuditResults results={results} brand={brandName} />}
     </div>
   );
