@@ -330,12 +330,29 @@ const Hero: React.FC<{
 );
 
 // ─── TYPES ────────────────────────────────────────────
+interface SwotData {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+}
+
+interface KpiData {
+  notoriete: number;
+  coherence: number;
+  digital: number;
+  contenu: number;
+}
+
 interface AuditData {
   score: number;
   analysis: string;
   strengths: string[];
   weaknesses: string[];
   recommendations: string[];
+  swot?: SwotData | null;
+  kpis?: KpiData | null;
+  plan?: string;
 }
 
 // ─── SCORE RING ───────────────────────────────────────
@@ -365,6 +382,65 @@ const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
     </div>
   );
 };
+
+// ─── KPI BAR ──────────────────────────────────────────
+const KpiBar: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
+  <div style={{ marginBottom: "16px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+      <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", color: "#a0a0a0", letterSpacing: "0.1em" }}>{label}</span>
+      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.9rem", color: "#f0f0f0", letterSpacing: "0.1em" }}>{value}</span>
+    </div>
+    <div style={{ background: "#2a2a2a", height: "3px", borderRadius: "2px" }}>
+      <div style={{ background: color, height: "3px", borderRadius: "2px", width: `${value}%`, transition: "width 1s cubic-bezier(.22,1,.36,1)" }} />
+    </div>
+  </div>
+);
+
+// ─── SWOT SECTION ─────────────────────────────────────
+const SwotSection: React.FC<{ swot: SwotData }> = ({ swot }) => {
+  const quadrants = [
+    { key: "strengths", label: "Forces", items: swot.strengths, color: "#a3e635", symbol: "+" },
+    { key: "weaknesses", label: "Faiblesses", items: swot.weaknesses, color: "#ef4444", symbol: "−" },
+    { key: "opportunities", label: "Opportunités", items: swot.opportunities, color: "#60a5fa", symbol: "↑" },
+    { key: "threats", label: "Menaces", items: swot.threats, color: "#f97316", symbol: "!" },
+  ];
+
+  return (
+    <div style={{ marginBottom: "32px" }}>
+      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "16px" }}>
+        Analyse SWOT
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        {quadrants.map((q) => (
+          <div key={q.key} style={{ padding: "20px", border: "1px solid #2a2a2a", background: "#161616" }}>
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.25em", color: q.color, textTransform: "uppercase", marginBottom: "12px", fontWeight: 600 }}>
+              {q.symbol} {q.label}
+            </p>
+            {q.items.map((item, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "flex-start" }}>
+                <span style={{ color: q.color, fontSize: "0.65rem", flexShrink: 0, marginTop: "2px" }}>{q.symbol}</span>
+                <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.75rem", color: "#d4d4d4", lineHeight: 1.6, fontWeight: 300 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── KPI SECTION ──────────────────────────────────────
+const KpiSection: React.FC<{ kpis: KpiData }> = ({ kpis }) => (
+  <div style={{ padding: "28px", border: "1px solid #2a2a2a", background: "#161616", marginBottom: "32px" }}>
+    <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "20px" }}>
+      KPI de marque
+    </p>
+    <KpiBar label="Notoriété" value={kpis.notoriete} color="#a3e635" />
+    <KpiBar label="Cohérence" value={kpis.coherence} color="#60a5fa" />
+    <KpiBar label="Présence digitale" value={kpis.digital} color="#f97316" />
+    <KpiBar label="Qualité de contenu" value={kpis.contenu} color="#e8e8e8" />
+  </div>
+);
 
 // ─── AUDIT RESULTS ────────────────────────────────────
 const AuditResults: React.FC<{ results: AuditData; brand: string; plan: string }> = ({ results, brand, plan }) => {
@@ -462,6 +538,34 @@ const AuditResults: React.FC<{ results: AuditData; brand: string; plan: string }
           ))}
         </div>
       </div>
+
+      {/* SWOT — Pro/Agence uniquement */}
+      {results.swot ? (
+        <div style={{ marginTop: "32px" }}>
+          <SwotSection swot={results.swot} />
+        </div>
+      ) : (
+        <div style={{ marginTop: "32px", padding: "24px", border: "1px dashed #2a2a2a", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.08em", color: "#4a4a4a", marginBottom: "4px" }}>ANALYSE SWOT + KPI DE MARQUE</p>
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", fontWeight: 300 }}>Disponible avec le plan Pro</p>
+          </div>
+          <Link to="/pricing" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", padding: "10px 20px", border: "1px solid #3a3a3a", color: "#7a7a7a", textDecoration: "none" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#e8e8e8"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; e.currentTarget.style.color = "#7a7a7a"; }}
+          >
+            Passer au Pro →
+          </Link>
+        </div>
+      )}
+
+      {/* KPI — Pro/Agence uniquement */}
+      {results.kpis && (
+        <div style={{ marginTop: "16px" }}>
+          <KpiSection kpis={results.kpis} />
+        </div>
+      )}
+
     </div>
   </section>
   );
