@@ -82,6 +82,23 @@ const Navbar = () => {
           AUDIT
         </button>
 
+        <Link
+          to="/pricing"
+          style={{
+            fontFamily: "'Raleway', sans-serif",
+            fontSize: "0.7rem",
+            letterSpacing: "0.2em",
+            color: "#7a7a7a",
+            fontWeight: 500,
+            textDecoration: "none",
+            transition: "color 0.3s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+        >
+          TARIFS
+        </Link>
+
         {!user && (
           <button
             type="button"
