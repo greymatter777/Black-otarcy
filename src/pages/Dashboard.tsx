@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/react";
+import { exportAuditPDF } from "../lib/exportPDF";
 
 // ─── TYPES ────────────────────────────────────────────
 interface AuditRecord {
@@ -123,14 +124,35 @@ const AuditDetail: React.FC<{ audit: AuditRecord; onClose: () => void }> = ({ au
               {audit.brand.toUpperCase()}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            style={{ background: "transparent", border: "none", color: "#7a7a7a", cursor: "pointer", fontSize: "1.2rem", padding: "4px" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
-          >
-            ✕
-          </button>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <button
+              onClick={() => exportAuditPDF({ ...audit })}
+              style={{
+                fontFamily: "'Raleway', sans-serif",
+                fontSize: "0.6rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                padding: "8px 16px",
+                border: "1px solid #3a3a3a",
+                background: "transparent",
+                color: "#e8e8e8",
+                cursor: "pointer",
+                transition: "border-color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#e8e8e8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#3a3a3a")}
+            >
+              ↓ PDF
+            </button>
+            <button
+              onClick={onClose}
+              style={{ background: "transparent", border: "none", color: "#7a7a7a", cursor: "pointer", fontSize: "1.2rem", padding: "4px" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Score + Analyse */}

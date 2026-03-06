@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/react";
+import { exportAuditPDF } from "../lib/exportPDF";
 
 // ─── HOOK: Scroll Reveal ──────────────────────────────
 function useReveal(deps: any[] = []) {
@@ -366,15 +367,61 @@ const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
 };
 
 // ─── AUDIT RESULTS ────────────────────────────────────
-const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results, brand }) => (
-  <section id="results" style={{ padding: "80px 60px", background: "#0f0f0f" }}>
+const AuditResults: React.FC<{ results: AuditData; brand: string; plan: string }> = ({ results, brand, plan }) => {
+  const canExport = plan === "pro" || plan === "agency";
+
+  return (
+    <section id="results" style={{ padding: "80px 60px", background: "#0f0f0f" }}>
     <div style={{ maxWidth: "860px", margin: "0 auto" }}>
-      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "12px" }}>
-        .02 — Résultats
-      </p>
-      <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "0.06em", color: "#f0f0f0", marginBottom: "48px" }}>
-        AUDIT — {brand.toUpperCase()}
-      </h2>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px" }}>
+        <div>
+          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "12px" }}>
+            .02 — Résultats
+          </p>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "0.06em", color: "#f0f0f0" }}>
+            AUDIT — {brand.toUpperCase()}
+          </h2>
+        </div>
+        {canExport ? (
+          <button
+            onClick={() => exportAuditPDF({ ...results, brand })}
+            style={{
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "10px 20px",
+              border: "1px solid #3a3a3a",
+              background: "transparent",
+              color: "#e8e8e8",
+              cursor: "pointer",
+              transition: "border-color 0.3s",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#e8e8e8")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#3a3a3a")}
+          >
+            ↓ Export PDF
+          </button>
+        ) : (
+          <Link
+            to="/pricing"
+            style={{
+              fontFamily: "'Raleway', sans-serif",
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "10px 20px",
+              border: "1px solid #2a2a2a",
+              color: "#4a4a4a",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🔒 PDF — Plan Pro
+          </Link>
+        )}
+      </div>
       <div style={{ display: "flex", gap: "40px", alignItems: "flex-start", marginBottom: "48px", padding: "36px", border: "1px solid #2a2a2a", background: "#161616" }}>
         <ScoreRing score={results.score} />
         <div>
@@ -417,7 +464,8 @@ const AuditResults: React.FC<{ results: AuditData; brand: string }> = ({ results
       </div>
     </div>
   </section>
-);
+  );
+};
 
 // ─── ERROR BANNER ─────────────────────────────────────
 const ErrorBanner: React.FC<{ message: string }> = ({ message }) => (
@@ -435,6 +483,7 @@ const Index = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [auditsLeft, setAuditsLeft] = useState<number | null>(null);
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
@@ -448,7 +497,7 @@ const Index = () => {
         },
       })
         .then((r) => r.json())
-        .then((d) => setAuditsLeft(d.auditsLeft ?? 3))
+        .then((d) => { setAuditsLeft(d.auditsLeft ?? 3); setUserPlan(d.plan ?? "free"); })
         .catch(() => setAuditsLeft(3));
     } else {
       setAuditsLeft(null);
@@ -550,7 +599,7 @@ const Index = () => {
           </Link>
         </div>
       )}
-      {results && <AuditResults results={results} brand={brandName} />}
+      {results && <AuditResults results={results} brand={brandName} plan={userPlan} />}
     </div>
   );
 };
