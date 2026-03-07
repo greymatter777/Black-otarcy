@@ -100,6 +100,23 @@ const Navbar = () => {
           TARIFS
         </Link>
 
+        <Link
+          to="/aio-report"
+          style={{
+            fontFamily: "'Raleway', sans-serif",
+            fontSize: "0.7rem",
+            letterSpacing: "0.2em",
+            color: "#a3e635",
+            fontWeight: 500,
+            textDecoration: "none",
+            transition: "color 0.3s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#a3e635")}
+        >
+          AIO
+        </Link>
+
         {!user && (
           <button
             type="button"
