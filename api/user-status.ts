@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyClerkAuth } from "../lib/auth";
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+function verifyClerkAuth(req: VercelRequest): string | null {
+  const userId = req.headers["x-clerk-user-id"];
+  if (!userId || typeof userId !== "string" || userId.trim() === "") return null;
+  if (!userId.startsWith("user_")) return null;
+  return userId.trim();
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
@@ -17,15 +18,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const clerkUserId = verifyClerkAuth(req);
   if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
 
+  const supabase = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
   const userEmail = req.headers["x-clerk-user-email"] as string ?? "";
 
-  let { data: user, error } = await supabase
-    .from("users").select("*").eq("id", clerkUserId).single();
+  let { data: user, error } = await supabase.from("users").select("*").eq("id", clerkUserId).single();
 
   if (error || !user) {
     const { data: newUser, error: insertError } = await supabase
-      .from("users")
-      .insert({ id: clerkUserId, email: userEmail, plan: "free", audits_used: 0, audits_limit: 3 })
+      .from("users").insert({ id: clerkUserId, email: userEmail, plan: "free", audits_used: 0, audits_limit: 3 })
       .select().single();
     if (insertError) return res.status(500).json({ error: "Erreur serveur." });
     user = newUser;
@@ -33,9 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     auditsLeft: user.audits_limit === -1 ? 999 : Math.max(0, user.audits_limit - user.audits_used),
-    auditsUsed: user.audits_used,
-    auditsLimit: user.audits_limit,
-    plan: user.plan,
-    email: user.email,
+    auditsUsed: user.audits_used, auditsLimit: user.audits_limit,
+    plan: user.plan, email: user.email,
   });
 }

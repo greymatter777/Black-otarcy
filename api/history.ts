@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyClerkAuth } from "../lib/auth";
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+function verifyClerkAuth(req: VercelRequest): string | null {
+  const userId = req.headers["x-clerk-user-id"];
+  if (!userId || typeof userId !== "string" || userId.trim() === "") return null;
+  if (!userId.startsWith("user_")) return null;
+  return userId.trim();
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
@@ -17,11 +18,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const clerkUserId = verifyClerkAuth(req);
   if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
 
-  const { data, error } = await supabase
-    .from("audits").select("*").eq("user_id", clerkUserId)
-    .order("created_at", { ascending: false }).limit(50);
+  const supabase = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+  const { data, error } = await supabase.from("audits").select("*").eq("user_id", clerkUserId).order("created_at", { ascending: false }).limit(50);
 
-  if (error) return res.status(500).json({ error: "Erreur lors de la récupération de l'historique." });
-
+  if (error) return res.status(500).json({ error: "Erreur lors de la récupération." });
   return res.status(200).json({ audits: data ?? [] });
 }

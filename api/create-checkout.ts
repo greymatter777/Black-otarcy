@@ -1,10 +1,24 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
-import { verifyClerkAuth } from "../lib/auth";
-import { checkRateLimit } from "../lib/ratelimit";
+
+function verifyClerkAuth(req: VercelRequest): string | null {
+  const userId = req.headers["x-clerk-user-id"];
+  if (!userId || typeof userId !== "string" || userId.trim() === "") return null;
+  if (!userId.startsWith("user_")) return null;
+  return userId.trim();
+}
+
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(key: string, limit: number, windowMs = 60_000): { allowed: boolean } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || now > entry.resetAt) { rateLimitStore.set(key, { count: 1, resetAt: now + windowMs }); return { allowed: true }; }
+  if (entry.count >= limit) return { allowed: false };
+  entry.count++;
+  return { allowed: true };
+}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-06-20" });
-
 const PRICE_IDS: Record<string, string> = {
   pro: process.env.STRIPE_PRO_PRICE_ID!,
   agency: process.env.STRIPE_AGENCY_PRICE_ID!,
@@ -21,12 +35,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
 
   const { allowed } = checkRateLimit(`checkout:${clerkUserId}`, 5, 60_000);
-  if (!allowed) return res.status(429).json({ error: "Trop de tentatives. Attendez une minute." });
+  if (!allowed) return res.status(429).json({ error: "Trop de tentatives." });
 
   const { plan } = req.body;
-  if (!plan || !["pro", "agency"].includes(plan) || !PRICE_IDS[plan]) {
-    return res.status(400).json({ error: "Plan invalide." });
-  }
+  if (!plan || !["pro", "agency"].includes(plan) || !PRICE_IDS[plan]) return res.status(400).json({ error: "Plan invalide." });
 
   const userEmail = req.headers["x-clerk-user-email"] as string | undefined;
 
@@ -42,6 +54,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     return res.status(200).json({ url: session.url });
   } catch {
-    return res.status(500).json({ error: "Erreur lors de la création du paiement." });
+    return res.status(500).json({ error: "Erreur paiement." });
   }
 }
