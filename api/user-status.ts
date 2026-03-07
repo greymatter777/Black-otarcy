@@ -10,15 +10,14 @@ const supabase = createClient(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clerk-user-id, x-clerk-user-email");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
-  const clerkUserId = await verifyClerkAuth(req.headers["authorization"] as string);
-  if (!clerkUserId) return res.status(401).json({ error: "Token invalide ou expiré." });
+  const clerkUserId = verifyClerkAuth(req);
+  if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
 
-  // Email récupéré depuis le token, pas depuis un header client
-  const userEmail = (req.headers["x-clerk-user-email"] as string) ?? "";
+  const userEmail = req.headers["x-clerk-user-email"] as string ?? "";
 
   let { data: user, error } = await supabase
     .from("users").select("*").eq("id", clerkUserId).single();
@@ -28,7 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from("users")
       .insert({ id: clerkUserId, email: userEmail, plan: "free", audits_used: 0, audits_limit: 3 })
       .select().single();
-
     if (insertError) return res.status(500).json({ error: "Erreur serveur." });
     user = newUser;
   }

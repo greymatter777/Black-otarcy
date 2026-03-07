@@ -10,12 +10,12 @@ const supabase = createClient(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clerk-user-id");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
-  const clerkUserId = await verifyClerkAuth(req.headers["authorization"] as string);
-  if (!clerkUserId) return res.status(401).json({ error: "Token invalide ou expiré." });
+  const clerkUserId = verifyClerkAuth(req);
+  if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
 
   const { data, error } = await supabase
     .from("audits").select("*").eq("user_id", clerkUserId)
