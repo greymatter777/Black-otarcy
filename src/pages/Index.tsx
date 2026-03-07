@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/react";
+import { useAuthFetch } from "../lib/useAuthFetch";
 import { exportAuditPDF } from "../lib/exportPDF";
 
 // ─── HOOK: Scroll Reveal ──────────────────────────────
@@ -500,15 +501,11 @@ const Index = () => {
 
   const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     if (isSignedIn && user) {
-      fetch("/api/user-status", {
-        headers: {
-          "x-clerk-user-id": user.id,
-          "x-clerk-user-email": user.emailAddresses[0]?.emailAddress ?? "",
-        },
-      })
+      authFetch("/api/user-status")
         .then((r) => r.json())
         .then((d) => { setAuditsLeft(d.auditsLeft ?? 3); setUserPlan(d.plan ?? "free"); })
         .catch(() => setAuditsLeft(3));
@@ -526,13 +523,9 @@ const Index = () => {
     setError(null);
 
     try {
-      const res = await fetch("/api/audit", {
+      const res = await authFetch("/api/audit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-clerk-user-id": user?.id ?? "",
-          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand: brandName.trim() }),
       });
 

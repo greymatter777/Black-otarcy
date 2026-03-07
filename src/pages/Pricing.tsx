@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
 import { Link } from "react-router-dom";
+import { useAuthFetch } from "../lib/useAuthFetch";
 
 const plans = [
   {
@@ -70,8 +71,9 @@ const plans = [
 ];
 
 const Pricing: React.FC = () => {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
+  const authFetch = useAuthFetch();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,13 +89,9 @@ const Pricing: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch("/api/create-checkout", {
+      const res = await authFetch("/api/create-checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-clerk-user-id": user?.id ?? "",
-          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
       });
 

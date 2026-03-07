@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/react";
+import { useAuthFetch } from "../lib/useAuthFetch";
 
 // ─── TYPES ────────────────────────────────────────────
 interface AioAction {
@@ -98,8 +99,9 @@ const CardSection: React.FC<{ title: string; items: string[]; symbol: string; co
 
 // ─── PAGE AIO REPORT ──────────────────────────────────
 const AioReport: React.FC = () => {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
+  const authFetch = useAuthFetch();
 
   const [brandName, setBrandName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -115,13 +117,9 @@ const AioReport: React.FC = () => {
     setReport(null);
 
     try {
-      const res = await fetch("/api/aio-report", {
+      const res = await authFetch("/api/aio-report", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-clerk-user-id": user?.id ?? "",
-          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand: brandName.trim() }),
       });
 

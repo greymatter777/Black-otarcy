@@ -1,5 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { verifyClerkAuth } from "./_auth";
+import { checkRateLimit } from "./_ratelimit";
+import { sanitizeBrand } from "./_sanitize";
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -7,21 +10,30 @@ const supabase = createClient(
 );
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  // CORS
+  res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.status(204).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { brand } = req.body;
-
-  if (!brand || typeof brand !== "string" || brand.trim().length === 0) {
-    return res.status(400).json({ error: "Le nom de la marque est requis." });
-  }
-
-  const clerkUserId = req.headers["x-clerk-user-id"] as string;
+  // ─── 1. AUTH JWT Clerk ────────────────────────────────
+  const clerkUserId = await verifyClerkAuth(req.headers["authorization"] as string);
   if (!clerkUserId) {
-    return res.status(401).json({ error: "Vous devez être connecté pour lancer un audit." });
+    return res.status(401).json({ error: "Token invalide ou expiré. Reconnectez-vous." });
   }
 
+  // ─── 2. RATE LIMIT — 10 audits/minute par user ────────
+  const { allowed } = checkRateLimit(`audit:${clerkUserId}`, 10, 60_000);
+  if (!allowed) {
+    return res.status(429).json({ error: "Trop de requêtes. Attendez une minute avant de réessayer." });
+  }
+
+  // ─── 3. SANITIZE INPUT ────────────────────────────────
+  const { valid, value: brand, error: sanitizeError } = sanitizeBrand(req.body?.brand);
+  if (!valid) return res.status(400).json({ error: sanitizeError });
+
+  // ─── 4. VÉRIF PLAN & QUOTA ────────────────────────────
   const { data: user, error: userError } = await supabase
     .from("users")
     .select("*")
@@ -37,13 +49,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: "Clé API Groq manquante côté serveur." });
-  }
+  if (!apiKey) return res.status(500).json({ error: "Configuration serveur manquante." });
 
   const isPro = user.plan === "pro" || user.plan === "agency";
 
-  const prompt = `Tu es un expert en branding et en stratégie de marque. Effectue un audit complet de la marque "${brand.trim()}".
+  const prompt = `Tu es un expert en branding et en stratégie de marque. Effectue un audit complet de la marque "${brand}".
 
 Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement cette structure :
 {
@@ -80,8 +90,6 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
     });
 
     if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      console.error("Groq API error:", groqRes.status, errText);
       return res.status(502).json({ error: "Erreur lors de l'appel à l'IA." });
     }
 
@@ -93,14 +101,12 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
       const clean = rawContent.replace(/```json|```/g, "").trim();
       parsed = JSON.parse(clean);
     } catch {
-      console.error("JSON parse error. Raw content:", rawContent);
       return res.status(500).json({ error: "Réponse IA invalide. Réessayez." });
     }
 
-    // Sauvegarde dans Supabase
     await supabase.from("audits").insert({
       user_id: clerkUserId,
-      brand: brand.trim(),
+      brand,
       score: parsed.score ?? 0,
       analysis: parsed.analysis ?? "",
       strengths: parsed.strengths ?? [],
@@ -125,8 +131,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
       kpis: parsed.kpis ?? null,
       plan: user.plan,
     });
-  } catch (err) {
-    console.error("Unexpected error:", err);
+  } catch {
     return res.status(500).json({ error: "Erreur serveur inattendue." });
   }
 }
