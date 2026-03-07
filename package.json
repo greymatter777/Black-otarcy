@@ -9,16 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/backend": "^3.0.1",
-    "@clerk/react": "^6.0.1",
-    "@supabase/supabase-js": "^2.98.0",
-    "jspdf": "^4.2.0",
+    "@clerk/backend": "^1.13.0",
+    "@clerk/react": "^5.0.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "jspdf": "^2.5.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.22.0",
-    "resend": "^6.9.3",
-    "stripe": "^20.4.0",
-    "svix": "^1.86.0"
+    "stripe": "^16.0.0",
+    "svix": "^1.21.0"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",
