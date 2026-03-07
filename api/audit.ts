@@ -4,53 +4,48 @@ import { verifyClerkAuth } from "./_auth";
 import { checkRateLimit } from "./_ratelimit";
 import { sanitizeBrand } from "./_sanitize";
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clerk-user-id, x-clerk-user-email");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // ─── 1. AUTH JWT Clerk ────────────────────────────────
-  const clerkUserId = await verifyClerkAuth(req.headers["authorization"] as string);
-  if (!clerkUserId) {
-    return res.status(401).json({ error: "Token invalide ou expiré. Reconnectez-vous." });
+  // DIAGNOSTIC TEMPORAIRE
+  const hasSupabaseUrl = !!process.env.VITE_SUPABASE_URL;
+  const hasServiceKey = !!process.env.SUPABASE_SERVICE_KEY;
+  const hasGroqKey = !!process.env.GROQ_API_KEY;
+  if (!hasSupabaseUrl || !hasServiceKey || !hasGroqKey) {
+    return res.status(500).json({ 
+      error: "Variables manquantes",
+      debug: { hasSupabaseUrl, hasServiceKey, hasGroqKey }
+    });
   }
 
-  // ─── 2. RATE LIMIT — 10 audits/minute par user ────────
+  const clerkUserId = verifyClerkAuth(req);
+  if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
+
   const { allowed } = checkRateLimit(`audit:${clerkUserId}`, 10, 60_000);
-  if (!allowed) {
-    return res.status(429).json({ error: "Trop de requêtes. Attendez une minute avant de réessayer." });
-  }
+  if (!allowed) return res.status(429).json({ error: "Trop de requêtes. Attendez une minute." });
 
-  // ─── 3. SANITIZE INPUT ────────────────────────────────
   const { valid, value: brand, error: sanitizeError } = sanitizeBrand(req.body?.brand);
   if (!valid) return res.status(400).json({ error: sanitizeError });
 
-  // ─── 4. VÉRIF PLAN & QUOTA ────────────────────────────
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", clerkUserId)
-    .single();
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
 
-  if (userError || !user) {
-    return res.status(404).json({ error: "Utilisateur introuvable." });
-  }
+  const { data: user, error: userError } = await supabase
+    .from("users").select("*").eq("id", clerkUserId).single();
+
+  if (userError || !user) return res.status(404).json({ error: "Utilisateur introuvable.", debug: userError?.message });
 
   if (user.audits_limit !== -1 && user.audits_used >= user.audits_limit) {
     return res.status(403).json({ error: "Limite d'audits atteinte. Passez au plan Pro." });
   }
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: "Configuration serveur manquante." });
-
   const isPro = user.plan === "pro" || user.plan === "agency";
 
   const prompt = `Tu es un expert en branding et en stratégie de marque. Effectue un audit complet de la marque "${brand}".
@@ -77,10 +72,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
@@ -89,9 +81,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
       }),
     });
 
-    if (!groqRes.ok) {
-      return res.status(502).json({ error: "Erreur lors de l'appel à l'IA." });
-    }
+    if (!groqRes.ok) return res.status(502).json({ error: "Erreur lors de l'appel à l'IA." });
 
     const groqData = await groqRes.json();
     const rawContent = groqData.choices?.[0]?.message?.content ?? "";
@@ -116,8 +106,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
       kpis: parsed.kpis ?? null,
     });
 
-    await supabase
-      .from("users")
+    await supabase.from("users")
       .update({ audits_used: user.audits_used + 1, updated_at: new Date().toISOString() })
       .eq("id", clerkUserId);
 
@@ -131,7 +120,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
       kpis: parsed.kpis ?? null,
       plan: user.plan,
     });
-  } catch {
-    return res.status(500).json({ error: "Erreur serveur inattendue." });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Erreur serveur inattendue.", debug: err?.message });
   }
 }
