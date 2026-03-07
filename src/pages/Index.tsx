@@ -721,6 +721,100 @@ const Index = () => {
         </div>
       )}
       {results && <AuditResults results={results} brand={brandName} plan={userPlan} />}
+
+      {/* ─── SECTION AIO ─────────────────────────────── */}
+      {!results && (
+        <section style={{ padding: "100px 60px", background: "#0f0f0f", borderTop: "1px solid #1a1a1a" }}>
+          <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "24px" }}>
+              <div>
+                <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#a3e635", textTransform: "uppercase", marginBottom: "12px", fontWeight: 500 }}>
+                  .02 — AI Optimization
+                </p>
+                <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)", letterSpacing: "0.06em", color: "#f0f0f0", lineHeight: 0.95 }}>
+                  VOTRE MARQUE<br />VUE PAR LES IAs
+                </h2>
+              </div>
+              <Link
+                to="/aio-report"
+                style={{
+                  fontFamily: "'Raleway', sans-serif",
+                  fontSize: "0.66rem",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  padding: "12px 28px",
+                  background: "#a3e635",
+                  color: "#0f0f0f",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                  fontWeight: 600,
+                  transition: "opacity 0.2s",
+                  alignSelf: "flex-end",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                Lancer l'audit AIO →
+              </Link>
+            </div>
+
+            {/* Description */}
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.88rem", color: "#7a7a7a", lineHeight: 1.85, fontWeight: 300, maxWidth: "600px", marginBottom: "48px" }}>
+              ChatGPT, Claude, Gemini, Perplexity — les IAs deviennent le premier moteur de recherche de vos clients.
+              Découvrez comment elles perçoivent votre marque et obtenez un plan d'action concret pour optimiser votre visibilité IA.
+            </p>
+
+            {/* 3 features */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1px", background: "#1a1a1a" }}>
+              {[
+                {
+                  num: "01",
+                  title: "Score AIO",
+                  desc: "Mesurez votre visibilité dans les réponses des grandes IAs sur 100 points.",
+                  color: "#a3e635",
+                },
+                {
+                  num: "02",
+                  title: "Rapport de visibilité",
+                  desc: "Identifiez vos gaps de contenu, vos concurrents mieux positionnés et les sujets associés.",
+                  color: "#60a5fa",
+                },
+                {
+                  num: "03",
+                  title: "Plan d'optimisation",
+                  desc: "Actions prioritaires classées par impact pour améliorer votre présence IA immédiatement.",
+                  color: "#f97316",
+                },
+              ].map((f) => (
+                <div key={f.num} style={{ padding: "32px 28px", background: "#0f0f0f" }}>
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.9rem", letterSpacing: "0.15em", color: f.color, marginBottom: "12px" }}>
+                    {f.num}
+                  </p>
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.3rem", letterSpacing: "0.08em", color: "#f0f0f0", marginBottom: "10px" }}>
+                    {f.title}
+                  </p>
+                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#7a7a7a", lineHeight: 1.7, fontWeight: 300 }}>
+                    {f.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Plan badge */}
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", color: "#4a4a4a", marginTop: "24px", textAlign: "center", textTransform: "uppercase" }}>
+              Disponible avec les plans Pro et Agence —{" "}
+              <Link to="/pricing" style={{ color: "#7a7a7a", textDecoration: "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+              >
+                Voir les tarifs →
+              </Link>
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
