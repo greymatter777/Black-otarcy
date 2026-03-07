@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser, useClerk } from "@clerk/react";
 import { exportAuditPDF } from "../lib/exportPDF";
-import { useAuthFetch } from "../lib/useAuthFetch";
+
 
 // ─── TYPES ────────────────────────────────────────────
 interface AuditRecord {
@@ -206,10 +206,9 @@ const AuditDetail: React.FC<{ audit: AuditRecord; onClose: () => void }> = ({ au
 
 // ─── PAGE DASHBOARD ───────────────────────────────────
 const Dashboard: React.FC = () => {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
-  const authFetch = useAuthFetch();
 
   const [audits, setAudits] = useState<AuditRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -223,13 +222,20 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    authFetch("/api/history")
+    fetch("/api/history", {
+      headers: { "x-clerk-user-id": user?.id ?? "" },
+    })
       .then((r) => r.json())
       .then((d) => setAudits(d.audits ?? []))
       .catch(console.error)
       .finally(() => setLoading(false));
 
-    authFetch("/api/user-status")
+    fetch("/api/user-status", {
+      headers: {
+        "x-clerk-user-id": user?.id ?? "",
+        "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
+      },
+    })
       .then((r) => r.json())
       .then((d) => {
         setPlan(d.plan ?? "free");

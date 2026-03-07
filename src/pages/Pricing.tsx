@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
 import { Link } from "react-router-dom";
-import { useAuthFetch } from "../lib/useAuthFetch";
+
 
 const plans = [
   {
@@ -71,9 +71,8 @@ const plans = [
 ];
 
 const Pricing: React.FC = () => {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
-  const authFetch = useAuthFetch();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,9 +88,13 @@ const Pricing: React.FC = () => {
     setError(null);
 
     try {
-      const res = await authFetch("/api/create-checkout", {
+      const res = await fetch("/api/create-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-clerk-user-id": user?.id ?? "",
+          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
+        },
         body: JSON.stringify({ plan: planId }),
       });
 
@@ -99,7 +102,6 @@ const Pricing: React.FC = () => {
 
       if (!res.ok) throw new Error(data.error ?? "Erreur paiement.");
 
-      // Redirige vers Stripe Checkout
       window.location.href = data.url;
     } catch (err: any) {
       setError(err.message ?? "Une erreur s'est produite.");
