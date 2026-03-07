@@ -49,9 +49,7 @@ Réponds UNIQUEMENT en JSON valide, sans texte avant ou après, avec exactement 
 {
   "score": <nombre entier de 1 à 10>,
   "analysis": "<analyse de 3-4 phrases sur la présence, la notoriété et l'image de la marque>",
-  "strengths": ["<force 1>", "<force 2>", "<force 3>"],
-  "weaknesses": ["<faiblesse 1>", "<faiblesse 2>"],
-  "recommendations": ["<recommandation 1>", "<recommandation 2>", "<recommandation 3>"]${isPro ? `,
+  "recommendations": ["<recommandation concrète 1>", "<recommandation concrète 2>", "<recommandation concrète 3>"]${isPro ? `,
   "swot": {
     "strengths": ["<force stratégique 1>", "<force stratégique 2>", "<force stratégique 3>"],
     "weaknesses": ["<faiblesse stratégique 1>", "<faiblesse stratégique 2>", "<faiblesse stratégique 3>"],

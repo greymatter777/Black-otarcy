@@ -421,21 +421,13 @@ const AuditSection: React.FC<{
               </div>
             </div>
 
-            {/* 3 colonnes */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "32px" }}>
-              {[
-                { title: "Forces", items: results.strengths, color: "#a3e635", symbol: "+" },
-                { title: "Faiblesses", items: results.weaknesses, color: "#ef4444", symbol: "−" },
-                { title: "Recommandations", items: results.recommendations, color: "#f0f0f0", symbol: "→" },
-              ].map((col) => (
-                <div key={col.title} style={{ padding: "24px", border: "1px solid #2a2a2a", background: "#0f0f0f" }}>
-                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "14px" }}>{col.title}</p>
-                  {col.items.map((item, i) => (
-                    <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start" }}>
-                      <span style={{ color: col.color, fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>{col.symbol}</span>
-                      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.6, fontWeight: 300 }}>{item}</p>
-                    </div>
-                  ))}
+            {/* Recommandations */}
+            <div style={{ padding: "24px", border: "1px solid #2a2a2a", background: "#0f0f0f", marginBottom: "16px" }}>
+              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "14px" }}>Recommandations</p>
+              {results.recommendations.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start" }}>
+                  <span style={{ color: "#f0f0f0", fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>→</span>
+                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.6, fontWeight: 300 }}>{item}</p>
                 </div>
               ))}
             </div>
@@ -446,8 +438,8 @@ const AuditSection: React.FC<{
             ) : (
               <div style={{ padding: "24px", border: "1px dashed #2a2a2a", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                 <div>
-                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.08em", color: "#4a4a4a", marginBottom: "4px" }}>SWOT + KPI DE MARQUE</p>
-                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", fontWeight: 300 }}>Disponible avec le plan Pro</p>
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.08em", color: "#4a4a4a", marginBottom: "4px" }}>SWOT COMPLET + KPI DE MARQUE</p>
+                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", fontWeight: 300 }}>Forces · Faiblesses · Opportunités · Menaces — Plan Pro</p>
                 </div>
                 <Link to="/pricing" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", padding: "10px 20px", border: "1px solid #3a3a3a", color: "#7a7a7a", textDecoration: "none" }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#e8e8e8"; }}
