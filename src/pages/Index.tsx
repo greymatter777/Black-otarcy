@@ -412,8 +412,8 @@ const AuditSection: React.FC<{
               )}
             </div>
 
-            {/* Score + Analyse */}
-            <div style={{ display: "flex", gap: "32px", alignItems: "flex-start", marginBottom: "32px", padding: "28px", border: "1px solid #2a2a2a", background: "#0f0f0f" }}>
+            {/* 1. Score + Analyse */}
+            <div style={{ display: "flex", gap: "32px", alignItems: "flex-start", marginBottom: "16px", padding: "28px", border: "1px solid #2a2a2a", background: "#0f0f0f" }}>
               <ScoreRing score={results.score} />
               <div>
                 <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.25em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "10px" }}>Score de marque</p>
@@ -421,7 +421,32 @@ const AuditSection: React.FC<{
               </div>
             </div>
 
-            {/* Recommandations */}
+            {/* 2. KPI */}
+            {results.kpis ? (
+              <div style={{ marginBottom: "16px" }}>
+                <KpiSection kpis={results.kpis} />
+              </div>
+            ) : (
+              <div style={{ padding: "24px", border: "1px dashed #2a2a2a", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div>
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.08em", color: "#4a4a4a", marginBottom: "4px" }}>KPI DE MARQUE + SWOT COMPLET</p>
+                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", fontWeight: 300 }}>Notoriété · Cohérence · Digital · Contenu — Plan Pro</p>
+                </div>
+                <Link to="/pricing" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", padding: "10px 20px", border: "1px solid #3a3a3a", color: "#7a7a7a", textDecoration: "none" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#e8e8e8"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; e.currentTarget.style.color = "#7a7a7a"; }}
+                >Passer au Pro →</Link>
+              </div>
+            )}
+
+            {/* 3. SWOT */}
+            {results.swot && (
+              <div style={{ marginBottom: "16px" }}>
+                <SwotSection swot={results.swot} />
+              </div>
+            )}
+
+            {/* 4. Recommandations */}
             <div style={{ padding: "24px", border: "1px solid #2a2a2a", background: "#0f0f0f", marginBottom: "16px" }}>
               <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "14px" }}>Recommandations</p>
               {results.recommendations.map((item, i) => (
@@ -431,25 +456,6 @@ const AuditSection: React.FC<{
                 </div>
               ))}
             </div>
-
-            {/* SWOT */}
-            {results.swot ? (
-              <SwotSection swot={results.swot} />
-            ) : (
-              <div style={{ padding: "24px", border: "1px dashed #2a2a2a", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <div>
-                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.1rem", letterSpacing: "0.08em", color: "#4a4a4a", marginBottom: "4px" }}>SWOT COMPLET + KPI DE MARQUE</p>
-                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", fontWeight: 300 }}>Forces · Faiblesses · Opportunités · Menaces — Plan Pro</p>
-                </div>
-                <Link to="/pricing" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", padding: "10px 20px", border: "1px solid #3a3a3a", color: "#7a7a7a", textDecoration: "none" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#e8e8e8"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; e.currentTarget.style.color = "#7a7a7a"; }}
-                >Passer au Pro →</Link>
-              </div>
-            )}
-
-            {/* KPI */}
-            {results.kpis && <KpiSection kpis={results.kpis} />}
 
             {/* CTA AIO */}
             <div style={{ marginTop: "32px", padding: "32px", border: "1px solid #a3e635", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px", flexWrap: "wrap" }}>

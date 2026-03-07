@@ -168,8 +168,8 @@ export function exportAuditPDF(audit: AuditData) {
 
   y = 62;
 
-  // ─── ANALYSE ─────────────────────────────────────────
-  sectionHeader("ANALYSE");
+  // ─── 1. SCORE DE MARQUE ──────────────────────────────
+  sectionHeader("SCORE DE MARQUE");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(212, 212, 212);
@@ -177,24 +177,18 @@ export function exportAuditPDF(audit: AuditData) {
   doc.text(analysisLines, 14, y);
   y += analysisLines.length * 5.5 + 14;
 
-  // ─── RECOMMANDATIONS ─────────────────────────────────
-  sectionHeader("RECOMMANDATIONS");
-  audit.recommendations.forEach((item) => {
-    const lines = doc.splitTextToSize(item, W - 34);
-    checkPageBreak(lines.length * 4.8 + 8);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(...WHITE);
-    doc.text("→", 14, y);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(212, 212, 212);
-    doc.text(lines, 22, y);
-    y += lines.length * 4.8 + 5;
-  });
+  // ─── 2. KPI DE MARQUE ────────────────────────────────
+  if (audit.kpis) {
+    checkPageBreak(60);
+    sectionHeader("KPI DE MARQUE");
+    kpiBar("Notoriété", audit.kpis.notoriete, GREEN);
+    kpiBar("Cohérence", audit.kpis.coherence, BLUE);
+    kpiBar("Présence digitale", audit.kpis.digital, ORANGE);
+    kpiBar("Qualité de contenu", audit.kpis.contenu, WHITE);
+    y += 8;
+  }
 
-  y += 8;
-
-  // ─── SWOT ─────────────────────────────────────────────
+  // ─── 3. ANALYSE SWOT ─────────────────────────────────
   if (audit.swot) {
     checkPageBreak(20);
     sectionHeader("ANALYSE SWOT");
@@ -239,23 +233,29 @@ export function exportAuditPDF(audit: AuditData) {
       const endY1 = renderSwotCol(q1, 14);
       const endY2 = renderSwotCol(q2, 14 + halfW + 6);
       y = Math.max(endY1, endY2) + 10;
-
       checkPageBreak(10);
     }
 
     y += 6;
   }
 
-  // ─── KPI ─────────────────────────────────────────────
-  if (audit.kpis) {
-    checkPageBreak(60);
-    sectionHeader("KPI DE MARQUE");
-    kpiBar("Notoriété", audit.kpis.notoriete, GREEN);
-    kpiBar("Cohérence", audit.kpis.coherence, BLUE);
-    kpiBar("Présence digitale", audit.kpis.digital, ORANGE);
-    kpiBar("Qualité de contenu", audit.kpis.contenu, WHITE);
-    y += 6;
-  }
+  // ─── 4. RECOMMANDATIONS ──────────────────────────────
+  checkPageBreak(20);
+  sectionHeader("RECOMMANDATIONS");
+  audit.recommendations.forEach((item) => {
+    const lines = doc.splitTextToSize(item, W - 34);
+    checkPageBreak(lines.length * 4.8 + 8);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...WHITE);
+    doc.text("→", 14, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(212, 212, 212);
+    doc.text(lines, 22, y);
+    y += lines.length * 4.8 + 5;
+  });
+
+  y += 8;
 
   // ─── FOOTER ──────────────────────────────────────────
   addFooter();
