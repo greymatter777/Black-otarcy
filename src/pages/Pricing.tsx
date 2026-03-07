@@ -5,52 +5,67 @@ import { Link } from "react-router-dom";
 const plans = [
   {
     id: "free",
-    name: "Gratuit",
+    name: "Découverte",
+    badge: null,
     price: "0€",
     period: "",
-    description: "Pour découvrir Otarcy",
+    description: "Pour tester Otarcy",
     features: [
-      "3 audits au total",
-      "Analyse standard (Llama 70b)",
+      "3 audits de marque offerts",
       "Score de marque",
       "Forces & faiblesses",
+      "Recommandations basiques",
+    ],
+    locked: [
+      "Audit AIO",
+      "SWOT & KPI",
+      "Export PDF",
     ],
     cta: "Commencer gratuitement",
     highlighted: false,
+    color: "#7a7a7a",
   },
   {
     id: "pro",
-    name: "Pro",
+    name: "AIO Essentiel",
+    badge: "POPULAIRE",
     price: "19€",
     period: "/ mois",
     description: "Pour les entrepreneurs & freelances",
     features: [
       "Audits illimités",
-      "Analyse approfondie",
-      "Score de marque",
-      "Forces, faiblesses & recommandations",
+      "Score AIO — visibilité dans les IAs",
+      "Rapport de visibilité IA complet",
+      "Plan d'optimisation AIO",
+      "SWOT & KPI de marque",
+      "Export PDF",
       "Historique des audits",
       "Support email prioritaire",
     ],
-    cta: "Passer au Pro",
+    locked: [],
+    cta: "Passer à l'AIO Essentiel",
     highlighted: true,
+    color: "#a3e635",
   },
   {
     id: "agency",
-    name: "Agence",
+    name: "AIO Expert",
+    badge: null,
     price: "99€",
     period: "/ mois",
     description: "Pour les agences & consultants",
     features: [
-      "Audits illimités",
-      "Analyse ultra-détaillée",
+      "Tout de l'AIO Essentiel",
+      "Stratégie marketing IA",
+      "Quick Wins priorisés",
+      "Analyse multi-marques",
       "Marque blanche",
-      "Export PDF",
-      "Historique complet",
       "Support dédié",
     ],
-    cta: "Contacter l'équipe",
+    locked: [],
+    cta: "Passer à l'AIO Expert",
     highlighted: false,
+    color: "#60a5fa",
   },
 ];
 
@@ -120,11 +135,11 @@ const Pricing: React.FC = () => {
 
       <div style={{ maxWidth: "960px", margin: "0 auto" }}>
         {/* Header */}
-        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "12px" }}>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#a3e635", textTransform: "uppercase", marginBottom: "12px" }}>
           .03 — Tarifs
         </p>
         <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(3rem, 7vw, 5.5rem)", letterSpacing: "0.06em", color: "#f0f0f0", marginBottom: "16px" }}>
-          CHOISISSEZ VOTRE PLAN
+          OPTIMISEZ VOTRE<br />PRÉSENCE IA
         </h1>
         <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.82rem", color: "#7a7a7a", marginBottom: "64px", fontWeight: 300, letterSpacing: "0.1em" }}>
           Sans engagement — résiliez à tout moment
@@ -143,27 +158,21 @@ const Pricing: React.FC = () => {
               key={plan.id}
               style={{
                 padding: "36px 28px",
-                border: plan.highlighted ? "1px solid #e8e8e8" : "1px solid #2a2a2a",
+                border: plan.highlighted ? `1px solid ${plan.color}` : "1px solid #2a2a2a",
                 background: plan.highlighted ? "#161616" : "#0f0f0f",
                 position: "relative",
                 transition: "border-color 0.3s",
               }}
             >
-              {plan.highlighted && (
-                <div style={{
-                  position: "absolute",
-                  top: "-1px",
-                  left: "28px",
-                  background: "#e8e8e8",
-                  padding: "3px 10px",
-                }}>
+              {plan.badge && (
+                <div style={{ position: "absolute", top: "-1px", left: "28px", background: plan.color, padding: "3px 10px" }}>
                   <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.55rem", letterSpacing: "0.25em", color: "#0f0f0f", fontWeight: 600 }}>
-                    POPULAIRE
+                    {plan.badge}
                   </span>
                 </div>
               )}
 
-              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "8px" }}>
+              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.3em", color: plan.color, textTransform: "uppercase", marginBottom: "8px", fontWeight: 600 }}>
                 {plan.name}
               </p>
               <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "8px" }}>
@@ -178,11 +187,19 @@ const Pricing: React.FC = () => {
                 {plan.description}
               </p>
 
-              <div style={{ marginBottom: "32px" }}>
+              <div style={{ marginBottom: "24px" }}>
                 {plan.features.map((feature, i) => (
                   <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start" }}>
-                    <span style={{ color: "#a3e635", fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>+</span>
+                    <span style={{ color: plan.color, fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>+</span>
                     <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#d4d4d4", lineHeight: 1.5, fontWeight: 300 }}>
+                      {feature}
+                    </p>
+                  </div>
+                ))}
+                {plan.locked.map((feature, i) => (
+                  <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start" }}>
+                    <span style={{ color: "#3a3a3a", fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>×</span>
+                    <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#3a3a3a", lineHeight: 1.5, fontWeight: 300 }}>
                       {feature}
                     </p>
                   </div>
@@ -200,10 +217,11 @@ const Pricing: React.FC = () => {
                   textTransform: "uppercase",
                   padding: "12px",
                   border: plan.highlighted ? "none" : "1px solid #3a3a3a",
-                  background: plan.highlighted ? "#e8e8e8" : "transparent",
+                  background: plan.highlighted ? plan.color : "transparent",
                   color: plan.highlighted ? "#0f0f0f" : "#e8e8e8",
                   cursor: plan.id === "free" ? "default" : "pointer",
                   opacity: loadingPlan === plan.id ? 0.7 : 1,
+                  fontWeight: plan.highlighted ? 600 : 400,
                   transition: "background 0.25s, opacity 0.2s",
                 }}
               >
