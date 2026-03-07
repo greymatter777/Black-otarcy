@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
-import { verifyClerkAuth } from "./_auth";
-import { checkRateLimit } from "./_ratelimit";
+import { verifyClerkAuth } from "./auth";
+import { checkRateLimit } from "./ratelimit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-06-20" });
 

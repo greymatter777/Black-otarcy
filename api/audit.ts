@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyClerkAuth } from "./_auth";
-import { checkRateLimit } from "./_ratelimit";
-import { sanitizeBrand } from "./_sanitize";
+import { verifyClerkAuth } from "./auth";
+import { checkRateLimit } from "./ratelimit";
+import { sanitizeBrand } from "./sanitize";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");

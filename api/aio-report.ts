@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { verifyClerkAuth } from "./_auth";
-import { checkRateLimit } from "./_ratelimit";
-import { sanitizeBrand } from "./_sanitize";
+import { verifyClerkAuth } from "./auth";
+import { checkRateLimit } from "./ratelimit";
+import { sanitizeBrand } from "./sanitize";
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
