@@ -1,11 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 
-function verifyClerkAuth(req: VercelRequest): string | null {
-  const userId = req.headers["x-clerk-user-id"];
-  if (!userId || typeof userId !== "string" || userId.trim() === "") return null;
-  if (!userId.startsWith("user_")) return null;
-  return userId.trim();
+async function verifySupabaseAuth(req: VercelRequest): Promise<{ userId: string; email: string } | null> {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  const token = authHeader.replace("Bearer ", "").trim();
+  const supabase = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+  return { userId: user.id, email: user.email ?? "" };
 }
 
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
@@ -27,28 +31,27 @@ const PRICE_IDS: Record<string, string> = {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "https://blackotarcyweb.vercel.app");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-clerk-user-id, x-clerk-user-email");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const clerkUserId = verifyClerkAuth(req);
-  if (!clerkUserId) return res.status(401).json({ error: "Non authentifié." });
+  const auth = await verifySupabaseAuth(req);
+  if (!auth) return res.status(401).json({ error: "Non authentifié." });
 
-  const { allowed } = checkRateLimit(`checkout:${clerkUserId}`, 5, 60_000);
+  const { allowed } = checkRateLimit(`checkout:${auth.userId}`, 5, 60_000);
   if (!allowed) return res.status(429).json({ error: "Trop de tentatives." });
 
   const { plan } = req.body;
-  if (!plan || !["pro", "agency"].includes(plan) || !PRICE_IDS[plan]) return res.status(400).json({ error: "Plan invalide." });
-
-  const userEmail = req.headers["x-clerk-user-email"] as string | undefined;
+  if (!plan || !["pro", "agency"].includes(plan) || !PRICE_IDS[plan])
+    return res.status(400).json({ error: "Plan invalide." });
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
-      ...(userEmail ? { customer_email: userEmail } : {}),
+      ...(auth.email ? { customer_email: auth.email } : {}),
       line_items: [{ price: PRICE_IDS[plan], quantity: 1 }],
-      metadata: { clerk_user_id: clerkUserId, plan },
+      metadata: { user_id: auth.userId, plan },
       success_url: "https://blackotarcyweb.vercel.app/?success=true",
       cancel_url: "https://blackotarcyweb.vercel.app/pricing?canceled=true",
     });

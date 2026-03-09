@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser, useClerk } from "@clerk/react";
+import { useAuth } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
+import { authFetch } from "../lib/useAuthFetch";
 
 
 // ─── TYPES ────────────────────────────────────────────
@@ -99,8 +101,9 @@ const CardSection: React.FC<{ title: string; items: string[]; symbol: string; co
 
 // ─── PAGE AIO REPORT ──────────────────────────────────
 const AioReport: React.FC = () => {
-  const { isSignedIn, user } = useUser();
-  const { openSignIn } = useClerk();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isSignedIn = !!user;
 
   const [brandName, setBrandName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -109,20 +112,15 @@ const AioReport: React.FC = () => {
 
   const handleGenerate = async () => {
     if (!brandName.trim()) return;
-    if (!isSignedIn) { openSignIn(); return; }
+    if (!isSignedIn) { navigate("/login"); return; }
 
     setLoading(true);
     setError(null);
     setReport(null);
 
     try {
-      const res = await fetch("/api/aio-report", {
+      const res = await authFetch("/api/aio-report", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-clerk-user-id": user?.id ?? "",
-          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
-        },
         body: JSON.stringify({ brand: brandName.trim() }),
       });
 
@@ -199,7 +197,7 @@ const AioReport: React.FC = () => {
             </button>
           </div>
         ) : (
-          <button onClick={() => openSignIn()} style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "12px 32px", border: "none", background: "#e8e8e8", color: "#0f0f0f", cursor: "pointer" }}>
+          <button onClick={() => navigate("/login")} style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "12px 32px", border: "none", background: "#e8e8e8", color: "#0f0f0f", cursor: "pointer" }}>
             Connexion pour accéder
           </button>
         )}

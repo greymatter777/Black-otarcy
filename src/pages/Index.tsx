@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser, useClerk } from "@clerk/react";
+import { useAuth } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
+import { authFetch } from "../lib/useAuthFetch";
 
 import { exportAuditPDF } from "../lib/exportPDF";
 
@@ -20,8 +22,8 @@ function useReveal(deps: any[] = []) {
 // ─── NAV ──────────────────────────────────────────────
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const { user } = useUser();
-  const { openSignIn, signOut } = useClerk();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -71,16 +73,16 @@ const Navbar = () => {
               onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
             >
-              {user.firstName ?? user.emailAddresses[0]?.emailAddress}
+              {user?.user_metadata?.full_name ?? user?.email}
             </Link>
-            <button type="button" onClick={() => signOut()}
+            <button type="button" onClick={() => signOut().then(() => navigate("/login"))}
               style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#4a4a4a", background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
             >Déconnexion</button>
           </div>
         ) : (
-          <button type="button" onClick={() => openSignIn()}
+          <button type="button" onClick={() => navigate("/login")}
             style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "7px 16px", border: "1px solid #3a3a3a", background: "transparent", color: "#e8e8e8", cursor: "pointer", transition: "border-color 0.3s" }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; }}
@@ -499,17 +501,13 @@ const Index = () => {
   const [auditsLeft, setAuditsLeft] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string>("free");
 
-  const { isSignedIn, user } = useUser();
-  const { openSignIn } = useClerk();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isSignedIn = !!user;
 
   useEffect(() => {
     if (isSignedIn && user) {
-      fetch("/api/user-status", {
-        headers: {
-          "x-clerk-user-id": user.id,
-          "x-clerk-user-email": user.emailAddresses[0]?.emailAddress ?? "",
-        },
-      })
+      authFetch("/api/user-status")
         .then((r) => r.json())
         .then((d) => { setAuditsLeft(d.auditsLeft ?? 3); setUserPlan(d.plan ?? "free"); })
         .catch(() => setAuditsLeft(3));
@@ -527,13 +525,8 @@ const Index = () => {
     setError(null);
 
     try {
-      const res = await fetch("/api/audit", {
+      const res = await authFetch("/api/audit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-clerk-user-id": user?.id ?? "",
-          "x-clerk-user-email": user?.emailAddresses[0]?.emailAddress ?? "",
-        },
         body: JSON.stringify({ brand: brandName.trim() }),
       });
 
@@ -560,14 +553,14 @@ const Index = () => {
       <Navbar />
       <SideLeft />
       <SideRight />
-      <Hero isSignedIn={!!isSignedIn} onSignIn={() => openSignIn()} />
+      <Hero isSignedIn={!!isSignedIn} onSignIn={() => navigate("/login")} />
       <WhyAio />
       <AuditSection
         setBrandName={setBrandName}
         handleAudit={handleAudit}
         loading={loading}
         isSignedIn={!!isSignedIn}
-        onSignIn={() => openSignIn()}
+        onSignIn={() => navigate("/login")}
         auditsLeft={auditsLeft}
         results={results}
         brand={brandName}

@@ -1,28 +1,15 @@
-import { useAuth } from "@clerk/react";
-import { useCallback } from "react";
+import { supabase } from "./supabase";
 
-/**
- * Hook qui retourne une fonction fetch enrichie avec le JWT Clerk.
- * Utilisation : const authFetch = useAuthFetch();
- *               await authFetch("/api/audit", { method: "POST", ... })
- */
-export function useAuthFetch() {
-  const { getToken } = useAuth();
+export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token ?? "";
 
-  const authFetch = useCallback(
-    async (url: string, options: RequestInit = {}): Promise<Response> => {
-      const token = await getToken();
-
-      return fetch(url, {
-        ...options,
-        headers: {
-          ...(options.headers ?? {}),
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  return fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+      ...(options.headers ?? {}),
     },
-    [getToken]
-  );
-
-  return authFetch;
+  });
 }
