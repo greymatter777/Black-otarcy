@@ -70,21 +70,7 @@ export default function Login() {
       fontFamily: "'DM Sans', sans-serif",
       padding: "24px",
     }}>
-      {/* Background grid */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0,
-        backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-        backgroundSize: "60px 60px",
-        pointerEvents: "none",
-      }} />
 
-      {/* Glow */}
-      <div style={{
-        position: "fixed", top: "-20%", left: "50%", transform: "translateX(-50%)",
-        width: "600px", height: "400px",
-        background: "radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%)",
-        pointerEvents: "none", zIndex: 0,
-      }} />
 
       <div style={{
         position: "relative", zIndex: 1,
@@ -95,6 +81,11 @@ export default function Login() {
         padding: "40px 36px",
         backdropFilter: "blur(20px)",
       }}>
+        {/* Retour */}
+        <div style={{ marginBottom: "24px" }}>
+          <a href="/" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.2em", color: "rgba(255,255,255,0.3)", textDecoration: "none", textTransform: "uppercase" }}>← Retour</a>
+        </div>
+
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <div style={{

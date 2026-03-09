@@ -30,8 +30,8 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<PrivateRoute><Index /></PrivateRoute>} />
-          <Route path="/pricing" element={<PrivateRoute><Pricing /></PrivateRoute>} />
+          <Route path="/" element={<Index />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/aio-report" element={<PrivateRoute><AioReport /></PrivateRoute>} />
         </Routes>
