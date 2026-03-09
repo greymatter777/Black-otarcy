@@ -321,6 +321,13 @@ const KpiSection: React.FC<{ kpis: KpiData }> = ({ kpis }) => (
 );
 
 // ─── AUDIT SECTION ────────────────────────────────────
+interface GuideData {
+  titre: string;
+  etapes: { numero: number; action: string; detail: string }[];
+  duree_estimee: string;
+  impact: string;
+}
+
 const AuditSection: React.FC<{
   setBrandName: (v: string) => void;
   handleAudit: () => void;
@@ -334,6 +341,31 @@ const AuditSection: React.FC<{
   error: string | null;
 }> = ({ setBrandName, handleAudit, loading, isSignedIn, onSignIn, auditsLeft, results, brand, plan, error }) => {
   const canExport = plan === "pro" || plan === "agency";
+  const [guides, setGuides] = React.useState<Record<number, GuideData | null>>({});
+  const [guidesLoading, setGuidesLoading] = React.useState<Record<number, boolean>>({});
+  const [guidesOpen, setGuidesOpen] = React.useState<Record<number, boolean>>({});
+
+  const fetchGuide = async (index: number, recommendation: string) => {
+    if (guides[index]) {
+      setGuidesOpen((prev) => ({ ...prev, [index]: !prev[index] }));
+      return;
+    }
+    setGuidesLoading((prev) => ({ ...prev, [index]: true }));
+    setGuidesOpen((prev) => ({ ...prev, [index]: true }));
+    try {
+      const { authFetch } = await import("../lib/useAuthFetch");
+      const res = await authFetch("/api/guide", {
+        method: "POST",
+        body: JSON.stringify({ recommendation, brand }),
+      });
+      const data = await res.json();
+      setGuides((prev) => ({ ...prev, [index]: data }));
+    } catch {
+      setGuides((prev) => ({ ...prev, [index]: null }));
+    } finally {
+      setGuidesLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
 
   return (
     <section id="audit" style={{ padding: "100px 60px", background: "#161616", borderTop: "1px solid #1a1a1a" }}>
@@ -453,9 +485,54 @@ const AuditSection: React.FC<{
             <div style={{ padding: "24px", border: "1px solid #2a2a2a", background: "#0f0f0f", marginBottom: "16px" }}>
               <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "14px" }}>Recommandations</p>
               {results.recommendations.map((item, i) => (
-                <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start" }}>
-                  <span style={{ color: "#f0f0f0", fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>→</span>
-                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.6, fontWeight: 300 }}>{item}</p>
+                <div key={i} style={{ marginBottom: "16px" }}>
+                  {/* Ligne recommandation */}
+                  <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", flex: 1 }}>
+                      <span style={{ color: "#f0f0f0", fontSize: "0.7rem", marginTop: "2px", flexShrink: 0 }}>→</span>
+                      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.6, fontWeight: 300 }}>{item}</p>
+                    </div>
+                    {isSignedIn && (
+                      <button
+                        onClick={() => fetchGuide(i, item)}
+                        style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.15em", textTransform: "uppercase", padding: "4px 10px", border: "1px solid #3a3a3a", background: "transparent", color: guidesOpen[i] ? "#a3e635" : "#7a7a7a", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, marginLeft: "12px", transition: "color 0.2s, border-color 0.2s" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#a3e635"; e.currentTarget.style.color = "#a3e635"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = guidesOpen[i] ? "#a3e635" : "#3a3a3a"; e.currentTarget.style.color = guidesOpen[i] ? "#a3e635" : "#7a7a7a"; }}
+                      >
+                        {guidesLoading[i] ? "..." : guidesOpen[i] ? "↑ Fermer" : "→ Comment faire ?"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Guide d'action */}
+                  {guidesOpen[i] && (
+                    <div style={{ marginTop: "12px", marginLeft: "18px", padding: "20px", background: "#161616", border: "1px solid #2a2a2a", borderLeft: "2px solid #a3e635" }}>
+                      {guidesLoading[i] ? (
+                        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#7a7a7a", letterSpacing: "0.1em" }}>Génération du guide...</p>
+                      ) : guides[i] ? (
+                        <>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1rem", letterSpacing: "0.08em", color: "#f0f0f0" }}>{guides[i]!.titre}</p>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.1em", color: "#7a7a7a", padding: "2px 8px", border: "1px solid #2a2a2a" }}>⏱ {guides[i]!.duree_estimee}</span>
+                              <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.1em", color: guides[i]!.impact === "élevé" ? "#a3e635" : guides[i]!.impact === "moyen" ? "#f97316" : "#7a7a7a", padding: "2px 8px", border: `1px solid ${guides[i]!.impact === "élevé" ? "#a3e635" : guides[i]!.impact === "moyen" ? "#f97316" : "#3a3a3a"}` }}>Impact {guides[i]!.impact}</span>
+                            </div>
+                          </div>
+                          {guides[i]!.etapes.map((etape) => (
+                            <div key={etape.numero} style={{ display: "flex", gap: "14px", marginBottom: "14px", alignItems: "flex-start" }}>
+                              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.9rem", color: "#a3e635", flexShrink: 0, minWidth: "18px" }}>{etape.numero}</span>
+                              <div>
+                                <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#f0f0f0", fontWeight: 600, marginBottom: "3px" }}>{etape.action}</p>
+                                <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#7a7a7a", lineHeight: 1.6, fontWeight: 300 }}>{etape.detail}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#ef4444" }}>Erreur lors de la génération. Réessayez.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
