@@ -109,6 +109,41 @@ const AioReport: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AioData | null>(null);
+  const [linkedinPlan, setLinkedinPlan] = useState<any | null>(null);
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
+  const [linkedinOpen, setLinkedinOpen] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleLinkedinPlan = async () => {
+    if (!report) return;
+    if (linkedinPlan) { setLinkedinOpen(!linkedinOpen); return; }
+    setLinkedinLoading(true);
+    setLinkedinOpen(true);
+    try {
+      const res = await authFetch("/api/linkedin-plan", {
+        method: "POST",
+        body: JSON.stringify({
+          brand: brandName,
+          aio_score: report.aio_score,
+          gaps_contenu: report.visibilite.gaps_contenu,
+          sujets_associes: report.visibilite.sujets_associes,
+          actions_prioritaires: report.plan_optimisation.actions_prioritaires,
+        }),
+      });
+      const data = await res.json();
+      setLinkedinPlan(data);
+    } catch {
+      setLinkedinPlan(null);
+    } finally {
+      setLinkedinLoading(false);
+    }
+  };
+
+  const copyPost = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
 
   const handleGenerate = async () => {
     if (!brandName.trim()) return;
@@ -308,6 +343,65 @@ const AioReport: React.FC = () => {
                 </Link>
               </div>
             )}
+
+            {/* ─── PLAN LINKEDIN ─────────────────────────── */}
+            <div style={{ marginTop: "32px", padding: "28px", border: "1px solid #2a2a2a", background: "#0f0f0f" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: linkedinOpen ? "24px" : "0" }}>
+                <div>
+                  <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.2rem", letterSpacing: "0.08em", color: "#f0f0f0", marginBottom: "4px" }}>
+                    PLAN DE CONTENU LINKEDIN
+                  </p>
+                  <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#7a7a7a", fontWeight: 300 }}>
+                    5 posts prêts à publier pour améliorer ta visibilité IA
+                  </p>
+                </div>
+                <button onClick={handleLinkedinPlan} disabled={linkedinLoading}
+                  style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", padding: "10px 20px", border: "1px solid #a3e635", background: linkedinOpen ? "#a3e635" : "transparent", color: linkedinOpen ? "#0f0f0f" : "#a3e635", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s", opacity: linkedinLoading ? 0.7 : 1 }}>
+                  {linkedinLoading ? "Génération..." : linkedinOpen ? "↑ Fermer" : "Générer →"}
+                </button>
+              </div>
+
+              {linkedinOpen && (
+                <div>
+                  {linkedinLoading ? (
+                    <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#7a7a7a", letterSpacing: "0.1em" }}>Génération de tes 5 posts LinkedIn...</p>
+                  ) : linkedinPlan?.posts ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      {linkedinPlan.posts.map((post: any, i: number) => (
+                        <div key={i} style={{ padding: "20px", border: "1px solid #2a2a2a", background: "#161616" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1rem", color: "#a3e635" }}>0{post.numero}</span>
+                              <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#7a7a7a", textTransform: "uppercase" }}>{post.type}</span>
+                            </div>
+                            <button onClick={() => copyPost(`${post.accroche}
+
+${post.contenu}
+
+${post.hashtags.map((h: string) => `#${h.replace("#","")}`).join(" ")}`, i)}
+                              style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.15em", textTransform: "uppercase", padding: "4px 10px", border: "1px solid #3a3a3a", background: copiedIndex === i ? "#a3e635" : "transparent", color: copiedIndex === i ? "#0f0f0f" : "#7a7a7a", cursor: "pointer", transition: "all 0.2s" }}>
+                              {copiedIndex === i ? "Copié ✓" : "Copier"}
+                            </button>
+                          </div>
+                          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.82rem", color: "#f0f0f0", fontWeight: 600, marginBottom: "8px", lineHeight: 1.5 }}>{post.accroche}</p>
+                          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#d4d4d4", lineHeight: 1.8, fontWeight: 300, marginBottom: "12px", whiteSpace: "pre-wrap" }}>{post.contenu}</p>
+                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
+                            {post.hashtags.map((h: string, j: number) => (
+                              <span key={j} style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", color: "#60a5fa", letterSpacing: "0.05em" }}>#{h.replace("#","")}</span>
+                            ))}
+                          </div>
+                          <div style={{ borderTop: "1px solid #2a2a2a", paddingTop: "10px" }}>
+                            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", color: "#4a4a4a", fontStyle: "italic" }}>💡 {post.objectif_aio}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#ef4444" }}>Erreur lors de la génération. Réessayez.</p>
+                  )}
+                </div>
+              )}
+            </div>
 
           </div>
         </section>
