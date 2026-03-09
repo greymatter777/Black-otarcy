@@ -344,6 +344,45 @@ const AuditSection: React.FC<{
   const [guides, setGuides] = React.useState<Record<number, GuideData | null>>({});
   const [guidesLoading, setGuidesLoading] = React.useState<Record<number, boolean>>({});
   const [guidesOpen, setGuidesOpen] = React.useState<Record<number, boolean>>({});
+  const [swotTemplates, setSwotTemplates] = React.useState<any | null>(null);
+  const [swotTemplatesLoading, setSwotTemplatesLoading] = React.useState(false);
+  const [swotTemplatesOpen, setSwotTemplatesOpen] = React.useState(false);
+  const [copiedSwot, setCopiedSwot] = React.useState<number | null>(null);
+
+  const fetchSwotTemplates = async () => {
+    if (!results?.swot) return;
+    if (swotTemplates) { setSwotTemplatesOpen(!swotTemplatesOpen); return; }
+    setSwotTemplatesLoading(true);
+    setSwotTemplatesOpen(true);
+    try {
+      const { authFetch } = await import("../lib/useAuthFetch");
+      const res = await authFetch("/api/swot-templates", {
+        method: "POST",
+        body: JSON.stringify({
+          brand,
+          strengths: results.swot.strengths,
+          opportunities: results.swot.opportunities,
+        }),
+      });
+      const data = await res.json();
+      setSwotTemplates(data);
+    } catch {
+      setSwotTemplates(null);
+    } finally {
+      setSwotTemplatesLoading(false);
+    }
+  };
+
+  const copySwotPost = (post: any, index: number) => {
+    const text = `${post.accroche}
+
+${post.contenu}
+
+${post.hashtags.map((h: string) => `#${h.replace("#","")}`).join(" ")}`;
+    navigator.clipboard.writeText(text);
+    setCopiedSwot(index);
+    setTimeout(() => setCopiedSwot(null), 2000);
+  };
 
   const fetchGuide = async (index: number, recommendation: string) => {
     if (guides[index]) {
@@ -478,6 +517,55 @@ const AuditSection: React.FC<{
             {results.swot && (
               <div style={{ marginBottom: "16px" }}>
                 <SwotSection swot={results.swot} />
+
+                {/* Templates LinkedIn depuis SWOT */}
+                <div style={{ marginTop: "12px", padding: "20px 24px", border: "1px solid #2a2a2a", background: "#0f0f0f" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: swotTemplatesOpen ? "20px" : "0" }}>
+                    <div>
+                      <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1rem", letterSpacing: "0.08em", color: "#f0f0f0", marginBottom: "2px" }}>TEMPLATES LINKEDIN</p>
+                      <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", color: "#7a7a7a", fontWeight: 300 }}>3 posts basés sur tes forces & opportunités</p>
+                    </div>
+                    <button onClick={fetchSwotTemplates} disabled={swotTemplatesLoading}
+                      style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", padding: "8px 16px", border: "1px solid #60a5fa", background: swotTemplatesOpen ? "#60a5fa" : "transparent", color: swotTemplatesOpen ? "#0f0f0f" : "#60a5fa", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s", opacity: swotTemplatesLoading ? 0.7 : 1 }}>
+                      {swotTemplatesLoading ? "..." : swotTemplatesOpen ? "↑ Fermer" : "Générer →"}
+                    </button>
+                  </div>
+
+                  {swotTemplatesOpen && (
+                    <div>
+                      {swotTemplatesLoading ? (
+                        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#7a7a7a", letterSpacing: "0.1em" }}>Génération des templates...</p>
+                      ) : swotTemplates?.templates ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                          {swotTemplates.templates.map((t: any, i: number) => (
+                            <div key={i} style={{ padding: "18px", border: "1px solid #2a2a2a", background: "#161616", borderLeft: "2px solid #60a5fa" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.9rem", color: "#60a5fa" }}>0{t.numero}</span>
+                                  <span style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.18em", color: "#7a7a7a", textTransform: "uppercase" }}>{t.format}</span>
+                                </div>
+                                <button onClick={() => copySwotPost(t, i)}
+                                  style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "3px 8px", border: "1px solid #3a3a3a", background: copiedSwot === i ? "#60a5fa" : "transparent", color: copiedSwot === i ? "#0f0f0f" : "#7a7a7a", cursor: "pointer", transition: "all 0.2s" }}>
+                                  {copiedSwot === i ? "Copié ✓" : "Copier"}
+                                </button>
+                              </div>
+                              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#f0f0f0", fontWeight: 600, marginBottom: "6px", lineHeight: 1.5 }}>{t.accroche}</p>
+                              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.73rem", color: "#d4d4d4", lineHeight: 1.8, fontWeight: 300, marginBottom: "10px", whiteSpace: "pre-wrap" }}>{t.contenu}</p>
+                              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+                                {t.hashtags.map((h: string, j: number) => (
+                                  <span key={j} style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", color: "#60a5fa" }}>#{h.replace("#","")}</span>
+                                ))}
+                              </div>
+                              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", color: "#4a4a4a", fontStyle: "italic", borderTop: "1px solid #2a2a2a", paddingTop: "8px" }}>💡 {t.conseil}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#ef4444" }}>Erreur lors de la génération. Réessayez.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
