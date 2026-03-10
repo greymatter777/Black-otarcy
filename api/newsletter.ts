@@ -88,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Le Brief AIO <newsletter@otarcy.fr>",
+        from: "Le Brief AIO <onboarding@resend.dev>",
         // ⚠️ Remplacer par votre domaine vérifié dans Resend
         // En attendant : "onboarding@resend.dev" fonctionne en test
         to: [email.trim().toLowerCase()],
