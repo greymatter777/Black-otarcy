@@ -50,6 +50,7 @@ const Navbar = () => {
         {[
           { label: "AIO", to: "/aio-report", highlight: true },
           { label: "À PROPOS", to: "#about" },
+          { label: "NEWSLETTER", to: "#newsletter" },
           { label: "AUDIT", to: "#audit" },
           { label: "TARIFS", to: "/pricing" },
         ].map((item) => (
@@ -313,6 +314,143 @@ const AboutSection = () => (
     </div>
   </section>
 );
+
+// ─── NEWSLETTER SECTION ───────────────────────────────
+const NewsletterSection = () => {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async () => {
+    if (!email || !email.includes("@")) {
+      setErrorMsg("Adresse email invalide.");
+      setStatus("error");
+      return;
+    }
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur serveur");
+      setStatus("success");
+      setEmail("");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Une erreur est survenue.");
+      setStatus("error");
+    }
+  };
+
+  return (
+    <section
+      id="newsletter"
+      style={{
+        background: "#0a0a0a",
+        borderTop: "1px solid #1a1a1a",
+        borderBottom: "1px solid #1a1a1a",
+        padding: "80px 60px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+        {/* Label section */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+          <span style={{ fontSize: "0.65rem", letterSpacing: "0.3em", color: "#a3e635", textTransform: "uppercase", fontFamily: "'Raleway', sans-serif", fontWeight: 500 }}>
+            .04 — Newsletter
+          </span>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #a3e635 0%, transparent 100%)" }} />
+        </div>
+
+        {/* Titre */}
+        <h2 className="reveal" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", letterSpacing: "0.06em", color: "#f0f0f0", lineHeight: 0.95, margin: "0 0 10px 0" }}>
+          LE BRIEF{" "}
+          <em style={{ color: "#a3e635", fontStyle: "italic" }}>AIO</em>
+        </h2>
+
+        {/* Cadence */}
+        <p className="reveal" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.2em", color: "#4a4a4a", textTransform: "uppercase", margin: "0 0 20px 0" }}>
+          Chaque dimanche matin — 5 min de veille AIO
+        </p>
+
+        {/* Description */}
+        <p className="reveal" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.82rem", color: "#7a7a7a", lineHeight: 1.9, fontWeight: 300, margin: "0 0 36px 0", maxWidth: "520px" }}>
+          Les dernières évolutions de l'AI Optimization, les marques qui gagnent de la visibilité auprès de ChatGPT, Claude et Perplexity — et ce que ça change concrètement pour votre stratégie.
+        </p>
+
+        {/* Bullets */}
+        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 40px 0", display: "flex", flexDirection: "column", gap: "10px" }}>
+          {[
+            "1 synthèse des actus AIO de la semaine",
+            "1 marque analysée sous l'angle IA",
+            "1 action concrète à implémenter",
+          ].map((item, i) => (
+            <li key={i} style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#7a7a7a", fontWeight: 300 }}>
+              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#a3e635", flexShrink: 0 }} />
+              {item}
+            </li>
+          ))}
+        </ul>
+
+        {/* Formulaire */}
+        {status === "success" ? (
+          <div style={{ border: "1px solid #a3e635", padding: "20px 24px", display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ color: "#a3e635", fontSize: "18px" }}>✓</span>
+            <div>
+              <p style={{ fontFamily: "'Raleway', sans-serif", color: "#a3e635", margin: 0, fontSize: "0.76rem", fontWeight: 600, letterSpacing: "0.05em" }}>Inscription confirmée</p>
+              <p style={{ fontFamily: "'Raleway', sans-serif", color: "#4a4a4a", margin: "4px 0 0 0", fontSize: "0.68rem", letterSpacing: "0.05em" }}>Prochain Brief AIO — dimanche matin dans votre boîte.</p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div style={{ display: "flex", border: "1px solid #2a2a2a" }}>
+              <input
+                type="email"
+                placeholder="votre@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                style={{
+                  flex: 1, background: "#111", border: "none", outline: "none",
+                  padding: "13px 16px", color: "#f0f0f0", fontSize: "0.76rem",
+                  fontFamily: "'Raleway', sans-serif", caretColor: "#a3e635",
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={status === "loading"}
+                style={{
+                  background: status === "loading" ? "#1a2a0a" : "#a3e635",
+                  border: "none", padding: "13px 24px", color: "#0a0a0a",
+                  fontSize: "0.66rem", fontWeight: 700, fontFamily: "'Raleway', sans-serif",
+                  letterSpacing: "0.22em", cursor: status === "loading" ? "wait" : "pointer",
+                  textTransform: "uppercase", transition: "opacity 0.2s", whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => { if (status !== "loading") e.currentTarget.style.opacity = "0.85"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+              >
+                {status === "loading" ? "..." : "S'abonner →"}
+              </button>
+            </div>
+
+            {status === "error" && (
+              <p style={{ fontFamily: "'Raleway', sans-serif", color: "#ef4444", fontSize: "0.68rem", margin: "8px 0 0 0", letterSpacing: "0.05em" }}>{errorMsg}</p>
+            )}
+
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", color: "#a3e635", margin: "12px 0 0 0", letterSpacing: "0.1em" }}>
+              Gratuit. Aucun spam. Désabonnement en 1 clic.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
 
 // ─── TYPES ────────────────────────────────────────────
 interface SwotData {
@@ -818,6 +956,7 @@ const Index = () => {
       <Hero isSignedIn={!!isSignedIn} onSignIn={() => navigate("/login")} />
       <WhyAio />
       <AboutSection />
+      <NewsletterSection />
       <AuditSection
         setBrandName={setBrandName}
         handleAudit={handleAudit}
