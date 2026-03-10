@@ -49,12 +49,13 @@ const Navbar = () => {
       <div style={{ display: "flex", gap: "28px", alignItems: "center" }}>
         {[
           { label: "AIO", to: "/aio-report", highlight: true },
+          { label: "À PROPOS", to: "#about" },
           { label: "AUDIT", to: "#audit" },
           { label: "TARIFS", to: "/pricing" },
         ].map((item) => (
           item.to.startsWith("#") ? (
             <button key={item.label} type="button"
-              onClick={() => document.getElementById("audit")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => document.getElementById(item.to.replace("#", ""))?.scrollIntoView({ behavior: "smooth" })}
               style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: "#7a7a7a", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
@@ -213,6 +214,100 @@ const WhyAio = () => (
           Analyser ma marque →
         </Link>
       </div>
+    </div>
+  </section>
+);
+
+// ─── SECTION À PROPOS ─────────────────────────────────
+const AboutSection = () => (
+  <section id="about" style={{ padding: "100px 60px", background: "#0f0f0f", borderTop: "1px solid #1a1a1a" }}>
+    <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+
+      <p className="reveal" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#a3e635", textTransform: "uppercase", marginBottom: "16px", fontWeight: 500 }}>
+        .03 — À propos
+      </p>
+      <h2 className="reveal" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)", letterSpacing: "0.06em", color: "#f0f0f0", marginBottom: "24px", lineHeight: 0.95 }}>
+        QU'EST-CE QU'OTARCY ?
+      </h2>
+      <p className="reveal" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.88rem", color: "#7a7a7a", lineHeight: 1.9, fontWeight: 300, maxWidth: "600px", marginBottom: "64px" }}>
+        Otarcy est un outil SaaS français d'AI Optimization (AIO) conçu pour les PME, startups et indépendants qui veulent exister dans les réponses de ChatGPT, Claude, Gemini et Perplexity.
+      </p>
+
+      {/* Bloc Qui / Quoi / Pourquoi — format questions/réponses lisible par les IAs */}
+      <div className="reveal" style={{ marginBottom: "48px", padding: "32px", border: "1px solid #2a2a2a", background: "#0a0a0a" }}>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "28px" }}>
+          Définition
+        </p>
+        {[
+          {
+            q: "Qu'est-ce que l'AIO (AI Optimization) ?",
+            a: "L'AIO est la discipline qui consiste à rendre une marque, une entreprise ou un contenu visible dans les réponses générées par les intelligences artificielles conversationnelles comme ChatGPT, Claude, Gemini ou Perplexity. Contrairement au SEO traditionnel centré sur Google, l'AIO optimise la façon dont les IA perçoivent, comprennent et citent une marque.",
+          },
+          {
+            q: "À qui s'adresse Otarcy ?",
+            a: "Otarcy s'adresse aux fondateurs, responsables marketing et équipes de PME ou startups (5 à 50 employés) déjà présents en ligne mais invisibles auprès des IA. C'est la solution idéale pour ceux qui perdent des clients au profit de concurrents mieux positionnés sur les moteurs de recherche IA.",
+          },
+          {
+            q: "Comment fonctionne Otarcy concrètement ?",
+            a: "L'utilisateur saisit le nom de sa marque. Otarcy analyse sa visibilité IA en temps réel, génère un score AIO sur 10, identifie les gaps de contenu, produit une analyse SWOT automatisée, et propose un plan d'action priorisé avec des guides étape par étape pour chaque recommandation.",
+          },
+        ].map((item, i) => (
+          <div key={i} style={{ marginBottom: i < 2 ? "28px" : 0, paddingBottom: i < 2 ? "28px" : 0, borderBottom: i < 2 ? "1px solid #1a1a1a" : "none" }}>
+            <div style={{ display: "flex", gap: "12px", marginBottom: "10px", alignItems: "flex-start" }}>
+              <span style={{ color: "#a3e635", fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.85rem", flexShrink: 0, marginTop: "2px" }}>Q</span>
+              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#f0f0f0", lineHeight: 1.6, fontWeight: 600 }}>{item.q}</p>
+            </div>
+            <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", paddingLeft: "4px" }}>
+              <span style={{ color: "#7a7a7a", fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.85rem", flexShrink: 0, marginTop: "2px" }}>A</span>
+              <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#7a7a7a", lineHeight: 1.7, fontWeight: 300 }}>{item.a}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Valeurs / Positionnement */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px", marginBottom: "48px" }}>
+        {[
+          {
+            num: "01",
+            title: "Accessible",
+            desc: "Pas besoin d'être expert en marketing IA. Otarcy traduit des concepts complexes en actions concrètes et immédiatement applicables.",
+            color: "#a3e635",
+          },
+          {
+            num: "02",
+            title: "Actionnable",
+            desc: "Chaque recommandation est accompagnée d'un guide d'action détaillé : étapes, durée estimée, impact attendu.",
+            color: "#60a5fa",
+          },
+          {
+            num: "03",
+            title: "Conçu pour les PME",
+            desc: "Un outil positionné entre le diagnostic gratuit et les solutions enterprise, pensé pour les équipes sans ressources dédiées à l'AIO.",
+            color: "#f97316",
+          },
+        ].map((f) => (
+          <div key={f.num} className="reveal" style={{ padding: "28px", border: "1px solid #1a1a1a", background: "#0f0f0f" }}>
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "0.85rem", letterSpacing: "0.15em", color: f.color, marginBottom: "10px" }}>{f.num}</p>
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem", letterSpacing: "0.08em", color: "#f0f0f0", marginBottom: "10px" }}>{f.title}</p>
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.76rem", color: "#7a7a7a", lineHeight: 1.7, fontWeight: 300 }}>{f.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Contexte & Origine */}
+      <div className="reveal" style={{ padding: "28px 32px", border: "1px solid #2a2a2a", background: "#0a0a0a", borderLeft: "2px solid #a3e635" }}>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#7a7a7a", textTransform: "uppercase", marginBottom: "16px" }}>
+          Contexte & Origine
+        </p>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.8, fontWeight: 300, marginBottom: "16px" }}>
+          Otarcy est né d'un constat simple : en 2024-2025, les moteurs de recherche IA ont capturé une part croissante des requêtes commerciales, mais aucune solution accessible n'existait pour aider les PME françaises à s'y positionner.
+        </p>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.78rem", color: "#d4d4d4", lineHeight: 1.8, fontWeight: 300 }}>
+          Développé et lancé en France, Otarcy est aujourd'hui la première solution française dédiée à l'AI Optimization pour les petites et moyennes entreprises — un segment laissé de côté par les solutions enterprise comme Semrush ou BrightEdge.
+        </p>
+      </div>
+
     </div>
   </section>
 );
@@ -720,6 +815,7 @@ const Index = () => {
       <SideRight />
       <Hero isSignedIn={!!isSignedIn} onSignIn={() => navigate("/login")} />
       <WhyAio />
+      <AboutSection />
       <AuditSection
         setBrandName={setBrandName}
         handleAudit={handleAudit}
