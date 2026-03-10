@@ -15,7 +15,7 @@ src/
   main.tsx
   App.tsx                 — / et /pricing publiques — /dashboard et /aio-report protégés
   pages/
-    Index.tsx             — Page principale : Hero + WhyAio + AuditSection (publique)
+    Index.tsx             — Page principale : Hero + WhyAio + AboutSection + AuditSection (publique)
     Pricing.tsx           — 3 plans (publique)
     Dashboard.tsx         — Historique audits (protégé)
     AioReport.tsx         — Rapport AIO + Plan LinkedIn (protégé)
@@ -33,9 +33,9 @@ api/
   user-status.ts          — GET /api/user-status
   history.ts              — GET /api/history
   create-checkout.ts      — POST /api/create-checkout
-  guide.ts                — POST /api/guide  ✅ NOUVEAU
-  linkedin-plan.ts        — POST /api/linkedin-plan  ✅ NOUVEAU
-  swot-templates.ts       — POST /api/swot-templates  ✅ NOUVEAU
+  guide.ts                — POST /api/guide
+  linkedin-plan.ts        — POST /api/linkedin-plan
+  swot-templates.ts       — POST /api/swot-templates
   webhook.ts              — Stripe webhook
 
 supabase/
@@ -43,6 +43,12 @@ supabase/
   migration-swot-kpi.sql
   migration-aio.sql
   migration-rls-fix.sql
+
+public/
+  favicon.png             — Logo Otarcy (remplace favicon Vite)
+
+contexte.md               — Ce fichier
+otarcy-design-system.md   — Design system complet
 ```
 
 ---
@@ -74,10 +80,34 @@ supabase/
 - Stripe checkout + webhook
 - Collecte emails Resend
 - Sécurité MVP (rate limit + sanitize + CORS + RLS + JWT Supabase)
+- **Section À propos** AIO-friendly (Q&A structuré, valeurs, contexte & origine)
+- **Favicon** remplacé par le logo Otarcy
+- **Logo navbar** : OT/CY (was OT/AR)
+- **Icônes sociales** : LinkedIn + Instagram en `#a3e635`, visibles en sidebar gauche
 
 ### ⬜ À implémenter
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
+- Image de couverture LinkedIn
+
+---
+
+## Modifications UI (session 10/03/2026)
+
+### Navbar
+- Lien **À PROPOS** ajouté (scroll vers `#about`) entre AIO et AUDIT
+- Logo **OT/CY** (était OT/AR)
+- Handler scroll navbar générique — `item.to.replace("#", "")` au lieu de hardcodé `"audit"`
+
+### SideLeft — Icônes sociales
+- Icône Facebook remplacée par **LinkedIn** → `https://www.linkedin.com/company/otarcy-france`
+- Les deux icônes (LinkedIn + Instagram) passent en `stroke: "#a3e635"` (vert fixe)
+
+### Section AboutSection — `#about`
+- Positionnée entre `WhyAio` et `AuditSection`
+- Label : `.03 — À propos`
+- Contenu AIO-friendly : bloc Q&A (3 questions/réponses), 3 cartes de valeurs, bloc contexte & origine
+- Termes optimisés pour indexation IA : AIO, AI Optimization, ChatGPT, Claude, Gemini, Perplexity, PME françaises, solution française
 
 ---
 
@@ -106,6 +136,26 @@ supabase/
 - UI : bouton "Générer →" sous le SWOT dans `Index.tsx`
 - Bouton "Copier" sur chaque template
 - Disponible : Pro + Agence (visible uniquement si SWOT présent)
+
+---
+
+## Présence & Communauté
+
+### Page LinkedIn
+- **Nom** : Otarcy France
+- **URL** : https://www.linkedin.com/company/otarcy-france
+- **Tagline** : "La solution française d'AI Optimization pour les PME"
+- **Secteur** : Technologie, information et Internet
+- **Siège** : Bordeaux, Gironde
+- **Fondée en** : 2025
+- **Structure juridique** : OÜ (e-Residency Estonie) → déclarée "Société privée" sur LinkedIn
+
+### Stratégie de contenu LinkedIn
+- **Rythme** : quotidien
+- **Profil éditeur** : page entreprise Otarcy France uniquement
+- **Formats** : posts texte, carrousels, reels courts, newsletter hebdo
+- **5 piliers** : Éducation AIO / Audits publics de marques / Data exclusive / Prises de position / Build in public
+- **Newsletter** : "AIO Weekly" ou "Le Brief AIO" — dimanche matin, objectif 500 abonnés à 6 mois
 
 ---
 
@@ -145,9 +195,10 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 
 ```
 / (publique)
-  → Navbar : bouton "Connexion" → /login
+  → Navbar : AIO | À PROPOS | AUDIT | TARIFS | Connexion
   → Clic "Analyser" sans être connecté → /login
   → Connecté : audit → guides d'action → SWOT + templates LinkedIn
+  → SideLeft : icônes LinkedIn + Instagram (#a3e635)
 
 /aio-report (protégé)
   → Rapport AIO complet → plan de contenu LinkedIn en bas
@@ -206,6 +257,12 @@ RESEND_AUDIENCE_ID
 - Seule solution française accessible dédiée à l'AIO pour PME
 - Inexistant à Bordeaux — fenêtre d'avance à exploiter
 
+### Vision long terme
+- Marché AIO France en phase de sensibilisation en 2025-2026
+- Rentabilité réaliste à partir de 12 mois — période actuelle = investissement en audience et contenu
+- Flywheel : Contenu → Audience → Utilisateurs → Données → Contenu encore meilleur → Autorité de domaine
+- Otarcy doit devenir **la référence française de l'AIO** avant l'arrivée de concurrents mieux financés
+
 ### Budget lancement
 | Poste | Coût |
 |-------|------|
@@ -226,3 +283,6 @@ RESEND_AUDIENCE_ID
 7. **Supabase Redirect URLs** — toujours configurer `https://domaine/**` et `http://localhost:5173/**`
 8. **Stripe mode test vs live** — webhooks et secrets séparés, ne pas mélanger
 9. **Mise à jour plan manuelle** : `UPDATE users SET plan = 'pro', audits_limit = -1 WHERE email = '...'`
+10. **Favicon** : placer dans `public/` et vérifier la balise `<link rel="icon">` dans `index.html`
+11. **LinkedIn page entreprise** : OÜ estonienne → déclarer "Société privée" — slug URL à configurer dès création
+12. **Contenu AIO-friendly** : structurer en Q&A explicites, entités nommées, termes techniques non traduits (AIO, AI Optimization)
