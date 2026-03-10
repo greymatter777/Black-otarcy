@@ -1,0 +1,52 @@
+# .github/workflows/digest.yml
+# Déclenchement : samedi 19h00 UTC = 20h00 heure Paris (heure d'été)
+#                 samedi 20h00 UTC = 21h00 heure Paris (heure d'hiver)
+# Ajuster selon la saison — pour couvrir les deux : utiliser 19h00 UTC (été)
+#
+# Secrets GitHub à configurer dans Settings → Secrets → Actions :
+#   VERCEL_APP_URL   — ex: https://blackotarcyweb.vercel.app
+#   DIGEST_SECRET    — même valeur que la variable Vercel DIGEST_SECRET
+
+name: Weekly AIO Digest
+
+on:
+  schedule:
+    # Samedi 19h00 UTC (= 20h00 Paris heure d'été, 21h00 hiver)
+    - cron: "0 19 * * 6"
+
+  # Déclenchement manuel depuis GitHub Actions pour tester
+  workflow_dispatch:
+
+jobs:
+  send-digest:
+    name: Générer et envoyer Le Brief AIO
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Déclencher l'endpoint digest
+        run: |
+          echo "📡 Appel de l'endpoint digest..."
+
+          RESPONSE=$(curl -s -o /tmp/digest_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.VERCEL_APP_URL }}/api/digest" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.DIGEST_SECRET }}" \
+            --max-time 90)
+
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat /tmp/digest_response.json
+
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "❌ Échec du digest — code HTTP $RESPONSE"
+            exit 1
+          fi
+
+          echo "✅ Digest envoyé avec succès"
+
+      - name: Afficher le résumé
+        if: always()
+        run: |
+          echo "=== Résultat ==="
+          cat /tmp/digest_response.json || echo "(pas de réponse)"
