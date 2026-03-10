@@ -454,7 +454,7 @@ async function sendEmail(params: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Le Brief AIO <newsletter@otarcy.fr>",
+      from: "Le Brief AIO <onboarding@resend.dev>",
       to: Array.isArray(params.to) ? params.to : [params.to],
       subject: params.subject,
       html: params.html,
