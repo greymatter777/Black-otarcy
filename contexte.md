@@ -15,7 +15,7 @@ src/
   main.tsx
   App.tsx                 — / et /pricing publiques — /dashboard et /aio-report protégés
   pages/
-    Index.tsx             — Page principale : Hero + WhyAio + AboutSection + AuditSection (publique)
+    Index.tsx             — Hero + WhyAio + AboutSection + NewsletterSection + AuditSection (publique)
     Pricing.tsx           — 3 plans (publique)
     Dashboard.tsx         — Historique audits (protégé)
     AioReport.tsx         — Rapport AIO + Plan LinkedIn (protégé)
@@ -36,7 +36,13 @@ api/
   guide.ts                — POST /api/guide
   linkedin-plan.ts        — POST /api/linkedin-plan
   swot-templates.ts       — POST /api/swot-templates
+  newsletter.ts           — POST /api/newsletter (inscription Le Brief AIO)
+  digest.ts               — POST /api/digest (veille AIO automatisée — déclenché par GitHub Actions)
   webhook.ts              — Stripe webhook
+
+.github/
+  workflows/
+    digest.yml            — Cron GitHub Actions samedi 19h00 UTC (= 20h00 Paris)
 
 supabase/
   schema.sql
@@ -49,6 +55,7 @@ public/
 
 contexte.md               — Ce fichier
 otarcy-design-system.md   — Design system complet
+otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 ```
 
 ---
@@ -84,11 +91,18 @@ otarcy-design-system.md   — Design system complet
 - **Favicon** remplacé par le logo Otarcy
 - **Logo navbar** : OT/CY (was OT/AR)
 - **Icônes sociales** : LinkedIn + Instagram en `#a3e635`, visibles en sidebar gauche
+- **Newsletter "Le Brief AIO"** — formulaire sur le site + endpoint Resend + email de confirmation
+- **Veille AIO automatisée** — GitHub Actions cron + scraping RSS + résumé Groq + envoi Resend
 
 ### ⬜ À implémenter
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
+- Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
+- Schema.org Organization (JSON-LD) dans index.html
+- Page /glossaire (30 termes AIO)
+- Page /faq (20 questions AIO)
+- Pages pilier sectorielles
 
 ---
 
@@ -139,6 +153,32 @@ otarcy-design-system.md   — Design system complet
 
 ---
 
+## Nouvelles features (session 11/03/2026)
+
+### 4. Newsletter "Le Brief AIO" — `api/newsletter.ts`
+- Endpoint : `POST /api/newsletter`
+- Payload : `{ email }`
+- Ajoute le contact dans l'audience Resend dédiée + envoie email de confirmation
+- UI : composant `NewsletterSection` inliné dans `Index.tsx` (label `.04 — Newsletter`)
+- Positionné entre `<AboutSection />` et `<AuditSection />`
+- Lien **NEWSLETTER** ajouté dans la navbar (scroll vers `#newsletter`)
+- Disponible : tous les visiteurs (pas d'auth requise)
+- Env var : `RESEND_NEWSLETTER_AUDIENCE_ID`
+
+### 5. Veille AIO automatisée — `api/digest.ts` + `.github/workflows/digest.yml`
+- Endpoint : `POST /api/digest` (protégé par `DIGEST_SECRET`)
+- Scrape 6 sources RSS (Search Engine Journal, The Rundown AI, Ben's Bites, AI Snack, Marketing AI Institute, Maginative)
+- Filtre les articles pertinents AIO/AI
+- Génère via Groq : résumé analytique + newsletter éditorialisée (titre, actus, action de la semaine)
+- Envoie **2 emails via Resend** :
+  - Email éditeur (digest brut) → `DIGEST_RECIPIENT_EMAIL`
+  - Newsletter éditorialisée → tous les abonnés de l'audience newsletter
+- Déclenchement : GitHub Actions cron `0 19 * * 6` (samedi 19h UTC = 20h Paris)
+- Déclenchement manuel possible via GitHub Actions → Run workflow
+- Env vars : `DIGEST_SECRET`, `DIGEST_RECIPIENT_EMAIL`, `RESEND_NEWSLETTER_AUDIENCE_ID`
+
+---
+
 ## Présence & Communauté
 
 ### Page LinkedIn
@@ -155,7 +195,8 @@ otarcy-design-system.md   — Design system complet
 - **Profil éditeur** : page entreprise Otarcy France uniquement
 - **Formats** : posts texte, carrousels, reels courts, newsletter hebdo
 - **5 piliers** : Éducation AIO / Audits publics de marques / Data exclusive / Prises de position / Build in public
-- **Newsletter** : "AIO Weekly" ou "Le Brief AIO" — dimanche matin, objectif 500 abonnés à 6 mois
+- **Newsletter** : "Le Brief AIO" — dimanche matin, objectif 500 abonnés à 6 mois
+- **Document stratégique** : `otarcy-aio-foundation.docx` — plan 12 semaines complet
 
 ---
 
@@ -195,10 +236,11 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 
 ```
 / (publique)
-  → Navbar : AIO | À PROPOS | AUDIT | TARIFS | Connexion
+  → Navbar : AIO | À PROPOS | NEWSLETTER | AUDIT | TARIFS | Connexion
   → Clic "Analyser" sans être connecté → /login
   → Connecté : audit → guides d'action → SWOT + templates LinkedIn
   → SideLeft : icônes LinkedIn + Instagram (#a3e635)
+  → Sections : Hero → WhyAio → About → Newsletter → Audit
 
 /aio-report (protégé)
   → Rapport AIO complet → plan de contenu LinkedIn en bas
@@ -225,6 +267,16 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 - Mode live (orange) : webhook à créer avec `checkout.session.completed` + `customer.subscription.deleted`
 - Mise à jour manuelle plan possible via SQL : `UPDATE users SET plan = 'pro', audits_limit = -1 WHERE email = '...'`
 
+### Resend — Limitation domaine
+- Sans domaine vérifié, `onboarding@resend.dev` ne peut envoyer qu'à l'email du compte Resend (`ryansessou@gmail.com`)
+- Dès achat de `otarcy.fr` : vérifier le domaine dans Resend → changer `from` dans `newsletter.ts` et `digest.ts` pour `newsletter@otarcy.fr`
+
+### GitHub Actions — Digest cron
+- Fichier : `.github/workflows/digest.yml`
+- Cron : `0 19 * * 6` (samedi 19h UTC)
+- Secrets GitHub requis : `VERCEL_APP_URL` + `DIGEST_SECRET`
+- Test manuel : GitHub → Actions → Weekly AIO Digest → Run workflow
+
 ---
 
 ## Variables d'environnement (Vercel)
@@ -233,13 +285,16 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 GROQ_API_KEY
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_KEY      ← service_role JWT (commence par eyJ)
+SUPABASE_SERVICE_KEY              ← service_role JWT (commence par eyJ)
 STRIPE_SECRET_KEY
 STRIPE_PRO_PRICE_ID
 STRIPE_AGENCY_PRICE_ID
 STRIPE_WEBHOOK_SECRET
 RESEND_API_KEY
-RESEND_AUDIENCE_ID
+RESEND_AUDIENCE_ID                ← audience leads (existante)
+RESEND_NEWSLETTER_AUDIENCE_ID     ← audience "Le Brief AIO" (nouvelle)
+DIGEST_SECRET                     ← token partagé avec GitHub Actions
+DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resend)
 ```
 
 ---
@@ -286,3 +341,7 @@ RESEND_AUDIENCE_ID
 10. **Favicon** : placer dans `public/` et vérifier la balise `<link rel="icon">` dans `index.html`
 11. **LinkedIn page entreprise** : OÜ estonienne → déclarer "Société privée" — slug URL à configurer dès création
 12. **Contenu AIO-friendly** : structurer en Q&A explicites, entités nommées, termes techniques non traduits (AIO, AI Optimization)
+13. **Resend sans domaine** : `onboarding@resend.dev` uniquement vers l'email du compte — acheter `otarcy.fr` pour débloquer
+14. **GitHub Actions cron** : secrets dans Settings → Secrets and variables → Actions — `VERCEL_APP_URL` + `DIGEST_SECRET`
+15. **Resend rate limit** : 2 req/sec — ajouter `setTimeout(1000)` entre envois successifs
+16. **`DIGEST_RECIPIENT_EMAIL`** doit être identique à l'email du compte Resend en mode test
