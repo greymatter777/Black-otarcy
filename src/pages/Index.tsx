@@ -105,7 +105,7 @@ const SideLeft = () => (
         <circle cx="4" cy="4" r="2" />
       </svg>
     </a>
-    <a href="https://www.instagram.com/otarcy.web?igsh=MTZiY2M4aGpoa3lncg==" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <a href="https://www.instagram.com/otarcy.ai?igsh=MTZiY2M4aGpoa3lncg==" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a3e635" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
