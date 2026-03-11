@@ -885,6 +885,114 @@ ${post.hashtags.map((h: string) => `#${h.replace("#","")}`).join(" ")}`;
   );
 };
 
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+const Footer = () => (
+  <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "60px 60px 40px" }}>
+    <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "40px", marginBottom: "48px" }}>
+
+        {/* Colonne 1 — Identité */}
+        <div>
+          <div style={{ marginBottom: "20px" }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.4rem", letterSpacing: "0.15em", color: "#f0f0f0", display: "block", lineHeight: 0.9 }}>OT</span>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.4rem", letterSpacing: "0.15em", color: "#7a7a7a", display: "block", lineHeight: 0.9 }}>CY</span>
+          </div>
+          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", lineHeight: 1.8, fontWeight: 300, maxWidth: "200px" }}>
+            La solution française d'AI Optimization pour les PME.
+          </p>
+          <div style={{ display: "flex", gap: "16px", marginTop: "20px" }}>
+            <a href="https://www.linkedin.com/company/otarcy-france" target="_blank" rel="noopener noreferrer" style={{ display: "flex" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                onMouseEnter={(e) => ((e.currentTarget as SVGElement).style.stroke = "#a3e635")}
+                onMouseLeave={(e) => ((e.currentTarget as SVGElement).style.stroke = "#4a4a4a")}
+              >
+                <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" />
+                <rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" />
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/otarcy.web" target="_blank" rel="noopener noreferrer" style={{ display: "flex" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                onMouseEnter={(e) => ((e.currentTarget as SVGElement).style.stroke = "#a3e635")}
+                onMouseLeave={(e) => ((e.currentTarget as SVGElement).style.stroke = "#4a4a4a")}
+              >
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        {/* Colonne 2 — Produit */}
+        <div>
+          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#3a3a3a", textTransform: "uppercase", marginBottom: "16px" }}>
+            Produit
+          </p>
+          {[
+            { label: "Audit AIO", to: "#audit", scroll: true },
+            { label: "Rapport AIO", to: "/aio-report", scroll: false },
+            { label: "Tarifs", to: "/pricing", scroll: false },
+            { label: "Dashboard", to: "/dashboard", scroll: false },
+          ].map((item) => (
+            item.scroll ? (
+              <button key={item.label} type="button"
+                onClick={() => document.getElementById("audit")?.scrollIntoView({ behavior: "smooth" })}
+                style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", background: "transparent", border: "none", cursor: "pointer", padding: "0 0 10px 0", letterSpacing: "0.05em", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+              >{item.label}</button>
+            ) : (
+              <Link key={item.label} to={item.to}
+                style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", textDecoration: "none", marginBottom: "10px", letterSpacing: "0.05em", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+              >{item.label}</Link>
+            )
+          ))}
+        </div>
+
+        {/* Colonne 3 — Ressources */}
+        <div>
+          <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", color: "#3a3a3a", textTransform: "uppercase", marginBottom: "16px" }}>
+            Ressources
+          </p>
+          {[
+            { label: "Glossaire AIO", to: "/glossaire", scroll: false },
+            { label: "FAQ", to: "/faq", scroll: false },
+            { label: "Newsletter", to: "#newsletter", scroll: true },
+          ].map((item) => (
+            item.scroll ? (
+              <button key={item.label} type="button"
+                onClick={() => document.getElementById("newsletter")?.scrollIntoView({ behavior: "smooth" })}
+                style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", background: "transparent", border: "none", cursor: "pointer", padding: "0 0 10px 0", letterSpacing: "0.05em", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#a3e635")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+              >{item.label}</button>
+            ) : (
+              <Link key={item.label} to={item.to}
+                style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", color: "#4a4a4a", textDecoration: "none", marginBottom: "10px", letterSpacing: "0.05em", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#a3e635")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+              >{item.label}</Link>
+            )
+          ))}
+        </div>
+
+      </div>
+
+      {/* Bas de footer */}
+      <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", color: "#2a2a2a", letterSpacing: "0.05em" }}>
+          © 2025 Otarcy France — Bordeaux, Gironde
+        </p>
+        <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.62rem", color: "#2a2a2a", letterSpacing: "0.05em" }}>
+          La référence française de l'AI Optimization pour les PME
+        </p>
+      </div>
+    </div>
+  </footer>
+);
+
 // ─── ERROR BANNER ─────────────────────────────────────
 const ErrorBanner: React.FC<{ message: string }> = ({ message }) => (
   <div style={{ padding: "20px 60px", background: "#1a0a0a", borderTop: "1px solid #3a1a1a" }}>
@@ -969,6 +1077,7 @@ const Index = () => {
         plan={userPlan}
         error={error}
       />
+      <Footer />
     </div>
   );
 };
