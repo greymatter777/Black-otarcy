@@ -13,12 +13,14 @@
 ```
 src/
   main.tsx
-  App.tsx                 — / et /pricing publiques — /dashboard et /aio-report protégés
+  App.tsx                 — / /pricing /glossaire /faq publiques — /dashboard /aio-report protégés
   pages/
     Index.tsx             — Hero + WhyAio + AboutSection + NewsletterSection + AuditSection (publique)
     Pricing.tsx           — 3 plans (publique)
     Dashboard.tsx         — Historique audits (protégé)
     AioReport.tsx         — Rapport AIO + Plan LinkedIn (protégé)
+    Glossaire.tsx         — /glossaire — Glossaire AIO (30 termes, publique)
+    Faq.tsx               — /faq — FAQ AIO (16 questions, publique)
     Login.tsx             — /login fond #0a0a0a full black + bouton ← Retour
     ResetPassword.tsx     — /reset-password
   lib/
@@ -91,8 +93,12 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - **Favicon** remplacé par le logo Otarcy
 - **Logo navbar** : OT/CY (was OT/AR)
 - **Icônes sociales** : LinkedIn + Instagram en `#a3e635`, visibles en sidebar gauche
+- **Instagram** : nouveau handle `@otarcy.ai` → https://www.instagram.com/otarcy.ai (était @otarcy.web)
 - **Newsletter "Le Brief AIO"** — formulaire sur le site + endpoint Resend + email de confirmation
 - **Veille AIO automatisée** — GitHub Actions cron + scraping RSS + résumé Groq + envoi Resend
+- **Page /glossaire** — 24 termes AIO, recherche + filtre par lettre, Schema.org DefinedTermSet
+- **Page /faq** — 16 questions en 4 catégories, accordion, Schema.org FAQPage
+- **Footer** — 3 colonnes (identité, produit, ressources), liens Glossaire + FAQ + Newsletter
 
 ### ⬜ À implémenter
 - Graphique évolution des scores
@@ -100,8 +106,6 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - Image de couverture LinkedIn
 - Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
 - Schema.org Organization (JSON-LD) dans index.html
-- Page /glossaire (30 termes AIO)
-- Page /faq (20 questions AIO)
 - Pages pilier sectorielles
 
 ---
@@ -178,6 +182,37 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - Env vars : `DIGEST_SECRET`, `DIGEST_RECIPIENT_EMAIL`, `RESEND_NEWSLETTER_AUDIENCE_ID`
 
 ---
+
+
+## Nouvelles features (session 11/03/2026 — suite)
+
+### 6. Page Glossaire — `src/pages/Glossaire.tsx`
+- Route : `/glossaire` (publique)
+- 24 termes AIO répartis en 8 lettres (A, C, E, G, L, P, R, S, V)
+- Barre de recherche + filtre par lettre
+- Schema.org `DefinedTermSet` + `DefinedTerm` pour chaque terme — crawlable par les LLMs
+- Lien vers `/faq` dans la navbar de la page
+- CTA audit en bas de page
+
+### 7. Page FAQ — `src/pages/Faq.tsx`
+- Route : `/faq` (publique)
+- 16 questions réparties en 4 catégories : Comprendre l'AIO / Otarcy & fonctionnement / Stratégie / Abonnement & données
+- Accordion interactif (ouverture/fermeture par clic)
+- Schema.org `FAQPage` + `Question` + `Answer` — format directement consommé par les LLMs pour les réponses directes
+- Liens croisés vers `/glossaire` et `/pricing`
+- CTA audit en bas de page
+
+### 8. Footer — composant `Footer` inliné dans `Index.tsx`
+- 3 colonnes : Identité (logo + description + réseaux) / Produit (Audit, Rapport, Tarifs, Dashboard) / Ressources (Glossaire, FAQ, Newsletter)
+- Icônes LinkedIn + Instagram passent en `#a3e635` au hover
+- Ligne basse : copyright + tagline de positionnement AIO
+- Point d'entrée principal vers `/glossaire` et `/faq` pour les utilisateurs
+
+### 9. index.html — Schema.org + meta tags
+- `<title>` et `<meta description>` réécrits pour l'AIO
+- Open Graph ajouté
+- Schema.org `@graph` avec 3 entités liées : `Organization`, `SoftwareApplication`, `WebSite`
+- Fonts Google (Bebas Neue + Raleway) chargées dans le HTML
 
 ## Présence & Communauté
 
@@ -345,3 +380,4 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 14. **GitHub Actions cron** : secrets dans Settings → Secrets and variables → Actions — `VERCEL_APP_URL` + `DIGEST_SECRET`
 15. **Resend rate limit** : 2 req/sec — ajouter `setTimeout(1000)` entre envois successifs
 16. **`DIGEST_RECIPIENT_EMAIL`** doit être identique à l'email du compte Resend en mode test
+17. **Instagram handle** : `@otarcy.ai` (https://www.instagram.com/otarcy.ai) — mettre à jour partout : SideLeft, Footer, Schema.org `sameAs`
