@@ -20,8 +20,18 @@ function useReveal(deps: any[] = []) {
 }
 
 // ─── NAV ──────────────────────────────────────────────
+const secteurLinks = [
+  { label: "Coaching & Formation", to: "/aio-coaching" },
+  { label: "E-commerce", to: "/aio-ecommerce" },
+  { label: "Immobilier", to: "/aio-immobilier" },
+  { label: "Restauration", to: "/aio-restauration" },
+  { label: "Conseil RH", to: "/aio-rh" },
+  { label: "Santé & Bien-être", to: "/aio-sante" },
+];
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [secteurOpen, setSecteurOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -30,6 +40,14 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Ferme le dropdown si clic en dehors
+  useEffect(() => {
+    if (!secteurOpen) return;
+    const handler = () => setSecteurOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [secteurOpen]);
 
   return (
     <nav style={{
@@ -68,6 +86,59 @@ const Navbar = () => {
             >{item.label}</Link>
           )
         ))}
+
+        {/* Dropdown Secteurs */}
+        <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => setSecteurOpen((v) => !v)}
+            style={{
+              fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em",
+              color: secteurOpen ? "#a3e635" : "#7a7a7a", fontWeight: 500,
+              background: "transparent", border: "none", cursor: "pointer",
+              transition: "color 0.3s", display: "flex", alignItems: "center", gap: "5px",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = secteurOpen ? "#a3e635" : "#7a7a7a")}
+          >
+            SECTEURS
+            <span style={{ fontSize: "0.5rem", transition: "transform 0.2s", display: "inline-block", transform: secteurOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+          </button>
+
+          {secteurOpen && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 14px)", right: 0,
+              background: "#0f0f0f", border: "1px solid #2a2a2a",
+              minWidth: "200px", zIndex: 200,
+            }}>
+              {secteurLinks.map((s) => (
+                <Link
+                  key={s.to}
+                  to={s.to}
+                  onClick={() => setSecteurOpen(false)}
+                  style={{
+                    display: "block",
+                    fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem",
+                    letterSpacing: "0.12em", color: "#7a7a7a",
+                    textDecoration: "none", padding: "10px 16px",
+                    borderBottom: "1px solid #1a1a1a",
+                    transition: "color 0.2s, background 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "#a3e635";
+                    (e.currentTarget as HTMLAnchorElement).style.background = "#161616";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "#7a7a7a";
+                    (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                  }}
+                >
+                  {s.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
