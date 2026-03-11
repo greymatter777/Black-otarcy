@@ -100,13 +100,21 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - **Page /faq** — 16 questions en 4 catégories, accordion, Schema.org FAQPage
 - **Footer** — 3 colonnes (identité, produit, ressources), liens Glossaire + FAQ + Newsletter
 
+### ✅ Pages pilier sectorielles (session 11/03/2026)
+- `/aio-coaching`     → `src/pages/AioCoaching.tsx`
+- `/aio-ecommerce`    → `src/pages/AioEcommerce.tsx`
+- `/aio-immobilier`   → `src/pages/AioImmobilier.tsx`
+- `/aio-restauration` → `src/pages/AioRestauration.tsx`
+
 ### ⬜ À implémenter
+- `/aio-rh`     → page pilier Conseil RH / Recrutement
+- `/aio-sante`  → page pilier Santé & Bien-être
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
 - Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
 - Schema.org Organization (JSON-LD) dans index.html
-- Pages pilier sectorielles
+- Dropdown "Secteurs" dans la navbar (quand les 6 pages pilier seront complètes)
 
 ---
 
@@ -381,3 +389,30 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 15. **Resend rate limit** : 2 req/sec — ajouter `setTimeout(1000)` entre envois successifs
 16. **`DIGEST_RECIPIENT_EMAIL`** doit être identique à l'email du compte Resend en mode test
 17. **Instagram handle** : `@otarcy.ai` (https://www.instagram.com/otarcy.ai) — mettre à jour partout : SideLeft, Footer, Schema.org `sameAs`
+18. **Pages pilier sectorielles** : routes statiques React dans `src/pages/` — même pattern que `/glossaire` et `/faq` — Schema.org FAQPage + WebPage + hook `useReveal` — pas d'auth requise
+19. **URL pilier** : préfixe `/aio-[secteur]` — plus AIO-friendly que `/secteurs/[secteur]` car le mot-clé "AIO" est dans l'URL
+20. **Audit exemple anonymisé** : chaque page pilier contient un cas Avant/Après fictif mais réaliste pour crédibiliser le produit auprès des visiteurs et des IAs
+
+---
+
+## Pages pilier sectorielles (session 11/03/2026)
+
+### Structure commune à chaque page
+- Label sectoriel + H1 Bebas Neue avec span vert
+- 3 stats clés (grid 3 colonnes)
+- `.01` — Le problème : 3 cards accentuées (orange / bleu / rouge)
+- `.02` — Audit exemple anonymisé : Avant/Après côte à côte
+- `.03` — 5 Quick Wins avec badges durée + impact
+- `.04` — FAQ accordion avec Schema.org FAQPage (JSON-LD)
+- CTA final border vert + liens vers les autres secteurs
+- Hook `useReveal()` pour animations scroll
+
+### Pages produites
+| Route | Fichier | Schema.org spécifique | Statut |
+|-------|---------|----------------------|--------|
+| `/aio-coaching` | `AioCoaching.tsx` | Person, FAQPage | ✅ En prod |
+| `/aio-ecommerce` | `AioEcommerce.tsx` | Product, Review, FAQPage | ✅ En prod |
+| `/aio-immobilier` | `AioImmobilier.tsx` | RealEstateAgent, LocalBusiness, FAQPage | ✅ En prod |
+| `/aio-restauration` | `AioRestauration.tsx` | Restaurant, Menu, FAQPage | ✅ En prod |
+| `/aio-rh` | `AioRh.tsx` | — | ⬜ À faire |
+| `/aio-sante` | `AioSante.tsx` | — | ⬜ À faire |
