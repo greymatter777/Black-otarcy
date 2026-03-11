@@ -12,6 +12,8 @@ import AioCoaching from "./pages/AioCoaching";
 import AioEcommerce from "./pages/AioEcommerce";
 import AioImmobilier from "./pages/AioImmobilier";
 import AioRestauration from "./pages/AioRestauration";
+import AioRh from "./pages/AioRh";
+import AioSante from "./pages/AioSante";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -44,6 +46,8 @@ export default function App() {
           <Route path="/aio-ecommerce" element={<AioEcommerce />} />
           <Route path="/aio-immobilier" element={<AioImmobilier />} />
           <Route path="/aio-restauration" element={<AioRestauration />} />
+          <Route path="/aio-rh" element={<AioRh />} />
+          <Route path="/aio-sante" element={<AioSante />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/aio-report" element={<PrivateRoute><AioReport /></PrivateRoute>} />
         </Routes>

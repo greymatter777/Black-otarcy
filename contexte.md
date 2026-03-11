@@ -101,20 +101,20 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - **Footer** — 3 colonnes (identité, produit, ressources), liens Glossaire + FAQ + Newsletter
 
 ### ✅ Pages pilier sectorielles (session 11/03/2026)
-- `/aio-coaching`     → `src/pages/AioCoaching.tsx`
-- `/aio-ecommerce`    → `src/pages/AioEcommerce.tsx`
-- `/aio-immobilier`   → `src/pages/AioImmobilier.tsx`
-- `/aio-restauration` → `src/pages/AioRestauration.tsx`
+- `/aio-coaching`     → `src/pages/AioCoaching.tsx` — Schema.org Person + FAQPage
+- `/aio-ecommerce`    → `src/pages/AioEcommerce.tsx` — Schema.org Product + Review + FAQPage
+- `/aio-immobilier`   → `src/pages/AioImmobilier.tsx` — Schema.org RealEstateAgent + FAQPage
+- `/aio-restauration` → `src/pages/AioRestauration.tsx` — Schema.org Restaurant + Menu + FAQPage
+- `/aio-rh`           → `src/pages/AioRh.tsx` — Schema.org ProfessionalService + FAQPage
+- `/aio-sante`        → `src/pages/AioSante.tsx` — Schema.org MedicalBusiness + FAQPage
 
 ### ⬜ À implémenter
-- `/aio-rh`     → page pilier Conseil RH / Recrutement
-- `/aio-sante`  → page pilier Santé & Bien-être
+- Dropdown "Secteurs" dans la navbar (6 pages pilier complètes — priorité suivante)
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
 - Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
 - Schema.org Organization (JSON-LD) dans index.html
-- Dropdown "Secteurs" dans la navbar (quand les 6 pages pilier seront complètes)
 
 ---
 
@@ -404,15 +404,16 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 - `.02` — Audit exemple anonymisé : Avant/Après côte à côte
 - `.03` — 5 Quick Wins avec badges durée + impact
 - `.04` — FAQ accordion avec Schema.org FAQPage (JSON-LD)
-- CTA final border vert + liens vers les autres secteurs
+- CTA final border vert + liens vers les 5 autres secteurs
 - Hook `useReveal()` pour animations scroll
 
 ### Pages produites
+
 | Route | Fichier | Schema.org spécifique | Statut |
 |-------|---------|----------------------|--------|
 | `/aio-coaching` | `AioCoaching.tsx` | Person, FAQPage | ✅ En prod |
 | `/aio-ecommerce` | `AioEcommerce.tsx` | Product, Review, FAQPage | ✅ En prod |
 | `/aio-immobilier` | `AioImmobilier.tsx` | RealEstateAgent, LocalBusiness, FAQPage | ✅ En prod |
 | `/aio-restauration` | `AioRestauration.tsx` | Restaurant, Menu, FAQPage | ✅ En prod |
-| `/aio-rh` | `AioRh.tsx` | — | ⬜ À faire |
-| `/aio-sante` | `AioSante.tsx` | — | ⬜ À faire |
+| `/aio-rh` | `AioRh.tsx` | ProfessionalService, FAQPage | ✅ En prod |
+| `/aio-sante` | `AioSante.tsx` | MedicalBusiness, FAQPage | ✅ En prod |
