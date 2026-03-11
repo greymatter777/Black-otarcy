@@ -447,19 +447,23 @@ async function sendEmail(params: {
   subject: string;
   html: string;
 }) {
+  const payload = {
+    from: "Le Brief AIO <onboarding@resend.dev>",
+    to: Array.isArray(params.to) ? params.to : [params.to],
+    subject: params.subject,
+    html: params.html,
+  };
+  console.log("[digest] sendEmail to:", JSON.stringify(payload.to), "subject:", params.subject);
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${params.resendKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: "Le Brief AIO <onboarding@resend.dev>",
-      to: Array.isArray(params.to) ? params.to : [params.to],
-      subject: params.subject,
-      html: params.html,
-    }),
+    body: JSON.stringify(payload),
   });
+  const data = await res.json();
+  console.log("[digest] Resend response:", res.status, JSON.stringify(data));
   return res.ok;
 }
 
