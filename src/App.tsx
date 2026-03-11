@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import AioReport from "./pages/AioReport";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import Glossaire from "./pages/Glossaire";
+import Faq from "./pages/Faq";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -32,6 +34,8 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Index />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/glossaire" element={<Glossaire />} />
+          <Route path="/faq" element={<Faq />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/aio-report" element={<PrivateRoute><AioReport /></PrivateRoute>} />
         </Routes>
