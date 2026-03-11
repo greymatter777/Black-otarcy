@@ -519,6 +519,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // 4. Récupérer les abonnés et envoyer la newsletter
+    // Délai de 1s pour respecter le rate limit Resend (2 req/s)
+    await new Promise((r) => setTimeout(r, 1000));
     console.log("[digest] Fetching subscribers...");
     const subscribers = await getNewsletterContacts(AUDIENCE_ID, RESEND_API_KEY);
     console.log(`[digest] ${subscribers.length} abonnés`);
@@ -534,6 +536,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           subject: `Le Brief AIO — ${dateLabel}`,
           html: newsletter_html,
         });
+        // Délai entre chaque batch
+        if (i + BATCH_SIZE < subscribers.length) {
+          await new Promise((r) => setTimeout(r, 1000));
+        }
       }
     }
 
