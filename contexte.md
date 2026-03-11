@@ -109,12 +109,26 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - `/aio-sante`        → `src/pages/AioSante.tsx` — Schema.org MedicalBusiness + FAQPage
 
 ### ⬜ À implémenter
-- Dropdown "Secteurs" dans la navbar (6 pages pilier complètes — priorité suivante)
+- Dropdown "Secteurs" dans la navbar (6 pages pilier complètes — ✅ fait)
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
 - Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
 - Schema.org Organization (JSON-LD) dans index.html
+
+---
+
+## Modifications UI (session 11/03/2026)
+
+### Navbar — Dropdown Secteurs
+- Nouveau state `secteurOpen` (boolean) dans `Navbar`
+- Tableau `secteurLinks` déclaré hors du composant — 6 entrées vers les pages pilier
+- Bouton **SECTEURS ▼** positionné après TARIFS, avant Connexion
+- Flèche `▼` animée (rotation 180° à l'ouverture)
+- Couleur verte `#a3e635` quand le dropdown est ouvert
+- Dropdown : fond `#0f0f0f`, border `#2a2a2a`, hover vert + fond `#161616`
+- Fermeture automatique au clic en dehors (listener `document click`)
+- Fermeture au clic sur un lien (`onClick={() => setSecteurOpen(false)}`)
 
 ---
 
