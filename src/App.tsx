@@ -31,7 +31,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return user ? <Navigate to="/" replace /> : <>{children}</>;
 }
 
-export default function App() {
+function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -55,3 +55,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+export default App;
