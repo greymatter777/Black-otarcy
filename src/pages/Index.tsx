@@ -71,6 +71,7 @@ const Navbar = () => {
           { label: "NEWSLETTER", to: "#newsletter" },
           { label: "AUDIT", to: "#audit" },
           { label: "TARIFS", to: "/pricing" },
+          { label: "BLOG", to: "/blog" },
         ].map((item) => (
           item.to.startsWith("#") ? (
             <button key={item.label} type="button"
