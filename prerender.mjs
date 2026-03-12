@@ -8,14 +8,15 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Routes publiques à prerender (routes privées exclues : /dashboard, /aio-report)
-const ROUTES = [
+// ─── ROUTES STATIQUES ─────────────────────────────────────────────────────────
+const STATIC_ROUTES = [
   '/',
   '/pricing',
   '/glossaire',
   '/faq',
   '/login',
   '/reset-password',
+  '/blog',
   '/aio-coaching',
   '/aio-ecommerce',
   '/aio-immobilier',
@@ -24,6 +25,31 @@ const ROUTES = [
   '/aio-sante',
 ]
 
+// ─── FETCH DES SLUGS BLOG DEPUIS SUPABASE ────────────────────────────────────
+async function fetchBlogSlugs() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.log('⚠️  Variables Supabase absentes — articles blog non prerenderés')
+    return []
+  }
+
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/blog_posts?published=eq.true&select=slug`,
+      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+    )
+    if (!res.ok) throw new Error(`Supabase error: ${res.status}`)
+    const data = await res.json()
+    return data.map((p) => `/blog/${p.slug}`)
+  } catch (err) {
+    console.log(`⚠️  Impossible de fetcher les slugs blog : ${err.message}`)
+    return []
+  }
+}
+
+// ─── GÉNÉRATION DES PAGES ─────────────────────────────────────────────────────
 const distDir = path.resolve(__dirname, 'dist')
 const templatePath = path.join(distDir, 'index.html')
 
@@ -34,29 +60,21 @@ if (!fs.existsSync(templatePath)) {
 
 const template = fs.readFileSync(templatePath, 'utf-8')
 
+// Récupérer les slugs blog dynamiques
+const blogRoutes = await fetchBlogSlugs()
+const allRoutes = [...STATIC_ROUTES, ...blogRoutes]
+
 let generated = 0
 
-for (const route of ROUTES) {
-  // Construire le chemin de sortie : / → dist/index.html (déjà existant)
-  // /glossaire → dist/glossaire/index.html
+for (const route of allRoutes) {
   const isRoot = route === '/'
   const routeDir = isRoot ? distDir : path.join(distDir, route.slice(1))
   const outputPath = path.join(routeDir, 'index.html')
 
-  // Créer le dossier si nécessaire
-  if (!isRoot) {
-    fs.mkdirSync(routeDir, { recursive: true })
-  }
+  fs.mkdirSync(routeDir, { recursive: true })
 
-  // Injecter la route courante dans le HTML pour que React Router hydrate correctement
-  // On ajoute un meta tag indiquant la route, et on met à jour canonical si présent
   let html = template
-
-  // Ajouter un commentaire indiquant la route prerenderée (utile pour debug)
-  html = html.replace(
-    '</head>',
-    `  <!-- prerendered: ${route} -->\n  </head>`
-  )
+  html = html.replace('</head>', `  <!-- prerendered: ${route} -->\n  </head>`)
 
   fs.writeFileSync(outputPath, html, 'utf-8')
   console.log(`✅ ${route} → ${outputPath.replace(__dirname, '.')}`)
@@ -64,4 +82,7 @@ for (const route of ROUTES) {
 }
 
 console.log(`\n🎉 ${generated} pages prerenderées dans dist/`)
+if (blogRoutes.length > 0) {
+  console.log(`📝 ${blogRoutes.length} article(s) blog inclus`)
+}
 console.log('📋 Les crawlers LLMs recevront maintenant du HTML complet pour chaque route.')
