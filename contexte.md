@@ -5,6 +5,7 @@
 - **Site** : https://blackotarcyweb.vercel.app
 - **Repo GitHub** : https://github.com/greymatter777/Black-Otarcy
 - **Stack** : React 18 + TypeScript, Vite, Vercel, @supabase/supabase-js (auth + db), stripe, resend, jspdf, Groq (llama-3.3-70b-versatile)
+- **Prerendering** : `prerender.mjs` custom — 12 routes HTML statiques générées au build, crawlables sans JavaScript
 
 ---
 
@@ -58,6 +59,7 @@ public/
 contexte.md               — Ce fichier
 otarcy-design-system.md   — Design system complet
 otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
+prerender.mjs             — Script prerendering statique (exécuté après vite build)
 ```
 
 ---
@@ -99,6 +101,7 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - **Page /glossaire** — 24 termes AIO, recherche + filtre par lettre, Schema.org DefinedTermSet
 - **Page /faq** — 16 questions en 4 catégories, accordion, Schema.org FAQPage
 - **Footer** — 3 colonnes (identité, produit, ressources), liens Glossaire + FAQ + Newsletter
+- **Prerendering statique** — 12 routes HTML statiques crawlables par les LLMs (`prerender.mjs` exécuté après `vite build`)
 
 ### ✅ Pages pilier sectorielles (session 11/03/2026)
 - `/aio-coaching`     → `src/pages/AioCoaching.tsx` — Schema.org Person + FAQPage
@@ -109,12 +112,11 @@ otarcy-aio-foundation.docx — Stratégie contenu AIO Foundation (12 semaines)
 - `/aio-sante`        → `src/pages/AioSante.tsx` — Schema.org MedicalBusiness + FAQPage
 
 ### ⬜ À implémenter
-- Dropdown "Secteurs" dans la navbar (6 pages pilier complètes — ✅ fait)
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
-- Domaine `otarcy.fr` — à acheter (~12€/an) pour débloquer l'envoi Resend sans restriction
-- Schema.org Organization (JSON-LD) dans index.html
+- Domaine `otarcy.ai` ou `otarcy.com` — `otarcy.fr` déjà pris — débloquer envoi Resend sans restriction
+- Blog `/blog` avec articles longs (Priorité 2 AIO Foundation — 4 articles 1500+ mots)
 
 ---
 
@@ -316,7 +318,7 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 
 ### Build Vercel
 ```json
-"build": "node --experimental-vm-modules node_modules/vite/bin/vite.js build"
+"build": "node --experimental-vm-modules node_modules/vite/bin/vite.js build && node prerender.mjs"
 ```
 
 ### Stripe webhook — À régler avant lancement live
@@ -326,7 +328,8 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 
 ### Resend — Limitation domaine
 - Sans domaine vérifié, `onboarding@resend.dev` ne peut envoyer qu'à l'email du compte Resend (`ryansessou@gmail.com`)
-- Dès achat de `otarcy.fr` : vérifier le domaine dans Resend → changer `from` dans `newsletter.ts` et `digest.ts` pour `newsletter@otarcy.fr`
+- `otarcy.fr` déjà pris — viser `otarcy.ai` ou `otarcy.com`
+- Dès achat du domaine : vérifier dans Resend → changer `from` dans `newsletter.ts` et `digest.ts` pour `newsletter@otarcy.ai`
 
 ### GitHub Actions — Digest cron
 - Fichier : `.github/workflows/digest.yml`
@@ -378,9 +381,10 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 ### Budget lancement
 | Poste | Coût |
 |-------|------|
-| Domaine (otarcy.fr ou .com) | ~12€/an |
+| Domaine `otarcy.ai` (2 ans min) | ~60-80€ |
+| Domaine `otarcy.com` (optionnel) | ~10-15€/an |
 | Tout le reste | 0€ |
-| **Total** | **~1€/mois** |
+| **Total** | **~3-5€/mois** |
 
 ---
 
@@ -406,6 +410,26 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 18. **Pages pilier sectorielles** : routes statiques React dans `src/pages/` — même pattern que `/glossaire` et `/faq` — Schema.org FAQPage + WebPage + hook `useReveal` — pas d'auth requise
 19. **URL pilier** : préfixe `/aio-[secteur]` — plus AIO-friendly que `/secteurs/[secteur]` car le mot-clé "AIO" est dans l'URL
 20. **Audit exemple anonymisé** : chaque page pilier contient un cas Avant/Après fictif mais réaliste pour crédibiliser le produit auprès des visiteurs et des IAs
+21. **React SPA sans SSR** : Vite + React par défaut génère `<div id="root"></div>` — les crawlers LLMs (Perplexity, OpenAI, Anthropic) n'exécutent pas JavaScript → contenu invisible sans prerendering
+22. **Prerendering custom** : `prerender.mjs` à la racine, exécuté après `vite build` — crée `dist/[route]/index.html` pour chaque route publique — compatible Vercel, zéro dépendance externe
+23. **vite-react-ssg incompatible** : nécessite réécriture des routes en format objet `RouteRecord[]` — incompatible avec `react-router-dom` JSX sans migration lourde
+24. **supabase.ts au build SSG** : le `throw new Error` sur variables manquantes bloque tout SSG/SSR — remplacer par des valeurs placeholder pour le build
+25. **`otarcy.fr` déjà pris** : appartient à une communauté nomade digitale sans rapport avec l'AIO — privilégier `otarcy.ai` (parfait pour le positionnement) ou `otarcy.com`
+26. **`otarcy.ai` et `otarcy.com`** : DNS ne résout pas → très probablement disponibles (à confirmer sur Namecheap ou Cloudflare avant achat)
+
+---
+
+## Nouvelles features (session 12/03/2026)
+
+### 10. Prerendering statique — `prerender.mjs`
+- Script Node.js custom à la racine du projet
+- Exécuté automatiquement après `vite build` via `&&` dans le script npm
+- Génère `dist/[route]/index.html` pour chaque route publique (12 routes)
+- Routes prerenderées : `/`, `/pricing`, `/glossaire`, `/faq`, `/login`, `/reset-password`, `/aio-coaching`, `/aio-ecommerce`, `/aio-immobilier`, `/aio-restauration`, `/aio-rh`, `/aio-sante`
+- Routes exclues (privées) : `/dashboard`, `/aio-report`
+- Résultat : crawlers LLMs reçoivent du HTML complet avec contenu + Schema.org sans exécuter JavaScript
+- Compatible Vercel, zéro dépendance externe, zéro modification des composants React existants
+- Vérification : `view-source:https://blackotarcyweb.vercel.app/glossaire` → 132 lignes de HTML complet ✅
 
 ---
 
