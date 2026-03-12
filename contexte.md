@@ -5,7 +5,7 @@
 - **Site** : https://blackotarcyweb.vercel.app
 - **Repo GitHub** : https://github.com/greymatter777/Black-Otarcy
 - **Stack** : React 18 + TypeScript, Vite, Vercel, @supabase/supabase-js (auth + db), stripe, resend, jspdf, Groq (llama-3.3-70b-versatile)
-- **Prerendering** : `prerender.mjs` custom — 12 routes HTML statiques générées au build, crawlables sans JavaScript
+- **Prerendering** : `prerender.mjs` custom — 13 routes HTML statiques générées au build, crawlables sans JavaScript
 
 ---
 
@@ -20,8 +20,10 @@ src/
     Pricing.tsx           — 3 plans (publique)
     Dashboard.tsx         — Historique audits (protégé)
     AioReport.tsx         — Rapport AIO + Plan LinkedIn (protégé)
-    Glossaire.tsx         — /glossaire — Glossaire AIO (30 termes, publique)
+    Glossaire.tsx         — /glossaire — Glossaire AIO (24 termes, publique)
     Faq.tsx               — /faq — FAQ AIO (16 questions, publique)
+    Blog.tsx              — /blog — Liste articles blog (publique)
+    BlogPost.tsx          — /blog/:slug — Article individuel (publique)
     Login.tsx             — /login fond #0a0a0a full black + bouton ← Retour
     ResetPassword.tsx     — /reset-password
   lib/
@@ -52,6 +54,7 @@ supabase/
   migration-swot-kpi.sql
   migration-aio.sql
   migration-rls-fix.sql
+  migration-blog.sql        — table blog_posts + RLS + premier article
 
 public/
   favicon.png             — Logo Otarcy (remplace favicon Vite)
@@ -101,7 +104,10 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - **Page /glossaire** — 24 termes AIO, recherche + filtre par lettre, Schema.org DefinedTermSet
 - **Page /faq** — 16 questions en 4 catégories, accordion, Schema.org FAQPage
 - **Footer** — 3 colonnes (identité, produit, ressources), liens Glossaire + FAQ + Newsletter
-- **Prerendering statique** — 12 routes HTML statiques crawlables par les LLMs (`prerender.mjs` exécuté après `vite build`)
+- **Prerendering statique** — 13 routes HTML statiques crawlables par les LLMs (`prerender.mjs` exécuté après `vite build`)
+- **Blog `/blog`** — liste articles + pages individuelles `/blog/:slug`, Supabase, Schema.org Article, 100% public
+- **Premier article** — "AIO vs SEO : les différences clés" (1500+ mots, structuré AIO, en prod)
+- **Lien BLOG** dans la navbar (entre TARIFS et SECTEURS)
 
 ### ✅ Pages pilier sectorielles (session 11/03/2026)
 - `/aio-coaching`     → `src/pages/AioCoaching.tsx` — Schema.org Person + FAQPage
@@ -116,7 +122,10 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
 - Domaine `otarcy.ai` ou `otarcy.com` — `otarcy.fr` déjà pris — débloquer envoi Resend sans restriction
-- Blog `/blog` avec articles longs (Priorité 2 AIO Foundation — 4 articles 1500+ mots)
+- Blog : 3 articles supplémentaires (objectif 4 articles Priorité 2 AIO Foundation)
+- Glossaire : +6 termes (24 → 30)
+- FAQ : +4 questions (16 → 20)
+- Priorité 3 : Wikidata, Capterra FR, Google Business Profile, mentions presse
 
 ---
 
@@ -295,7 +304,7 @@ async function verifySupabaseAuth(req): Promise<{ userId: string; email: string 
 
 ```
 / (publique)
-  → Navbar : AIO | À PROPOS | NEWSLETTER | AUDIT | TARIFS | Connexion
+  → Navbar : AIO | À PROPOS | NEWSLETTER | AUDIT | TARIFS | BLOG | SECTEURS ▼ | Connexion
   → Clic "Analyser" sans être connecté → /login
   → Connecté : audit → guides d'action → SWOT + templates LinkedIn
   → SideLeft : icônes LinkedIn + Instagram (#a3e635)
@@ -416,6 +425,10 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 24. **supabase.ts au build SSG** : le `throw new Error` sur variables manquantes bloque tout SSG/SSR — remplacer par des valeurs placeholder pour le build
 25. **`otarcy.fr` déjà pris** : appartient à une communauté nomade digitale sans rapport avec l'AIO — privilégier `otarcy.ai` (parfait pour le positionnement) ou `otarcy.com`
 26. **`otarcy.ai` et `otarcy.com`** : DNS ne résout pas → très probablement disponibles (à confirmer sur Namecheap ou Cloudflare avant achat)
+27. **Blog avec Supabase** : stocker les articles en DB plutôt qu'en fichiers `.ts` — éditable sans redeploy, scalable à 24+ articles
+28. **`useReveal` et données async** : passer la dépendance de chargement au hook `useReveal(loading)` — sinon les éléments `.reveal` restent invisibles (chargés après le premier rendu)
+29. **`dist/` dans le repo** : toujours exclure via `.gitignore` — Vercel génère son propre build, inutile de versionner les assets compilés
+30. **Navbar inlinée dans `Index.tsx`** : pas de composant séparé — modifier directement le tableau des liens dans `Index.tsx`
 
 ---
 
@@ -424,12 +437,30 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 ### 10. Prerendering statique — `prerender.mjs`
 - Script Node.js custom à la racine du projet
 - Exécuté automatiquement après `vite build` via `&&` dans le script npm
-- Génère `dist/[route]/index.html` pour chaque route publique (12 routes)
-- Routes prerenderées : `/`, `/pricing`, `/glossaire`, `/faq`, `/login`, `/reset-password`, `/aio-coaching`, `/aio-ecommerce`, `/aio-immobilier`, `/aio-restauration`, `/aio-rh`, `/aio-sante`
+- Génère `dist/[route]/index.html` pour chaque route publique (13 routes)
+- Routes prerenderées : `/`, `/pricing`, `/glossaire`, `/faq`, `/login`, `/reset-password`, `/blog`, `/aio-coaching`, `/aio-ecommerce`, `/aio-immobilier`, `/aio-restauration`, `/aio-rh`, `/aio-sante`
 - Routes exclues (privées) : `/dashboard`, `/aio-report`
+- Fetch dynamique des slugs blog depuis Supabase au build (si variables dispo)
 - Résultat : crawlers LLMs reçoivent du HTML complet avec contenu + Schema.org sans exécuter JavaScript
 - Compatible Vercel, zéro dépendance externe, zéro modification des composants React existants
 - Vérification : `view-source:https://blackotarcyweb.vercel.app/glossaire` → 132 lignes de HTML complet ✅
+
+### 11. Blog — `src/pages/Blog.tsx` + `src/pages/BlogPost.tsx`
+- Routes : `/blog` (liste) + `/blog/:slug` (article individuel) — 100% publiques
+- Contenu stocké dans Supabase table `blog_posts` — éditable sans redeploy
+- Schema.org `Blog` sur `/blog` + Schema.org `Article` sur chaque article
+- Rendu Markdown léger custom (H2, H3, listes, gras) — zéro dépendance externe
+- `useReveal` avec dépendance sur les données chargées — évite le rectangle noir au chargement
+- CTA "Auditer ma marque" en bas de chaque page
+- Lien **BLOG** ajouté dans la navbar (entre TARIFS et SECTEURS)
+- `dist/` retiré du repo GitHub — `.gitignore` créé
+
+### 12. Premier article blog — "AIO vs SEO : les différences clés"
+- Slug : `aio-vs-seo-differences`
+- 1500+ mots, structuré en H2/H3, format AIO-friendly
+- 5 différences fondamentales, conseils actionnables pour PME françaises
+- CTA Otarcy intégré en conclusion
+- Inséré via `migration-blog.sql` dans Supabase
 
 ---
 
