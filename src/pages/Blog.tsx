@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 // ─── HOOK REVEAL ──────────────────────────────────────────────────────────────
-function useReveal() {
+function useReveal(dep?: unknown) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
@@ -10,7 +10,7 @@ function useReveal() {
     );
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [dep]);
 }
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  useReveal();
+  useReveal(loading);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -138,7 +138,6 @@ export default function Blog() {
                   style={{ textDecoration: "none" }}
                 >
                   <article
-                    className="reveal"
                     style={{ background: "#0f0f0f", padding: "32px 28px", cursor: "pointer", transition: "background 0.2s", display: "block" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#111"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#0f0f0f"; }}

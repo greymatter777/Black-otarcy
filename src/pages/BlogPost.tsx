@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 
 // ─── HOOK REVEAL ──────────────────────────────────────────────────────────────
-function useReveal() {
+function useReveal(dep?: unknown) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
@@ -10,7 +10,7 @@ function useReveal() {
     );
     document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [dep]);
 }
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ export default function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  useReveal();
+  useReveal(post);
 
   useEffect(() => {
     if (!slug) return;
