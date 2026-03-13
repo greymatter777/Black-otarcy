@@ -45,8 +45,8 @@ const schemaJsonLd = {
       "@type": "WebPage",
       name: "AIO pour les Professionnels de Santé et du Bien-être — Otarcy",
       description: "Guide complet d'AI Optimization pour les professionnels de santé, thérapeutes et coachs bien-être. Apparaissez dans les recommandations de ChatGPT, Perplexity et Claude quand vos patients cherchent un praticien.",
-      url: "https://blackotarcyweb.vercel.app/aio-sante",
-      publisher: { "@type": "Organization", name: "Otarcy", url: "https://blackotarcyweb.vercel.app" },
+      url: "https://otarcy.app/aio-sante",
+      publisher: { "@type": "Organization", name: "Otarcy", url: "https://otarcy.app" },
     },
   ],
 };

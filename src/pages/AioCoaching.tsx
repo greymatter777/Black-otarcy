@@ -47,11 +47,11 @@ const schemaJsonLd = {
       name: "AIO pour les Coachs et Formateurs — Otarcy",
       description:
         "Guide complet d'AI Optimization pour les coachs, formateurs et consultants. Devenez visible auprès de ChatGPT, Perplexity et Claude.",
-      url: "https://blackotarcyweb.vercel.app/aio-coaching",
+      url: "https://otarcy.app/aio-coaching",
       publisher: {
         "@type": "Organization",
         name: "Otarcy",
-        url: "https://blackotarcyweb.vercel.app",
+        url: "https://otarcy.app",
       },
     },
   ],

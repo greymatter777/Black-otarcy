@@ -120,15 +120,15 @@ export default function Faq() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            "@id": "https://blackotarcyweb.vercel.app/faq",
+            "@id": "https://otarcy.app/faq",
             "name": "FAQ AIO — Otarcy",
             "description": "Questions fréquentes sur l'AI Optimization (AIO), Otarcy et la visibilité des marques dans les IAs.",
-            "url": "https://blackotarcyweb.vercel.app/faq",
+            "url": "https://otarcy.app/faq",
             "inLanguage": "fr",
             "publisher": {
               "@type": "Organization",
               "name": "Otarcy",
-              "url": "https://blackotarcyweb.vercel.app"
+              "url": "https://otarcy.app"
             },
             "mainEntity": FAQ.flatMap((cat) =>
               cat.questions.map((item) => ({

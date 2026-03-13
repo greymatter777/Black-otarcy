@@ -45,8 +45,8 @@ const schemaJsonLd = {
       "@type": "WebPage",
       name: "AIO pour les Cabinets RH et Recruteurs — Otarcy",
       description: "Guide complet d'AI Optimization pour les cabinets de conseil RH, recruteurs et DRH. Apparaissez dans les recommandations de ChatGPT, Perplexity et Claude quand vos clients cherchent un expert RH.",
-      url: "https://blackotarcyweb.vercel.app/aio-rh",
-      publisher: { "@type": "Organization", name: "Otarcy", url: "https://blackotarcyweb.vercel.app" },
+      url: "https://otarcy.app/aio-rh",
+      publisher: { "@type": "Organization", name: "Otarcy", url: "https://otarcy.app" },
     },
   ],
 };

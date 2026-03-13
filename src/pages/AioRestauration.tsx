@@ -45,8 +45,8 @@ const schemaJsonLd = {
       "@type": "WebPage",
       name: "AIO pour les Restaurants — Otarcy",
       description: "Guide complet d'AI Optimization pour les restaurants. Apparaissez dans les recommandations de ChatGPT, Perplexity et Claude quand vos clients cherchent où manger.",
-      url: "https://blackotarcyweb.vercel.app/aio-restauration",
-      publisher: { "@type": "Organization", name: "Otarcy", url: "https://blackotarcyweb.vercel.app" },
+      url: "https://otarcy.app/aio-restauration",
+      publisher: { "@type": "Organization", name: "Otarcy", url: "https://otarcy.app" },
     },
   ],
 };

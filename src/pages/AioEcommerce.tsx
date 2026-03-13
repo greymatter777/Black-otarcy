@@ -47,11 +47,11 @@ const schemaJsonLd = {
       name: "AIO pour les E-commerces — Otarcy",
       description:
         "Guide complet d'AI Optimization pour les boutiques e-commerce. Apparaissez dans les recommandations de ChatGPT, Perplexity et Claude quand vos clients cherchent vos produits.",
-      url: "https://blackotarcyweb.vercel.app/aio-ecommerce",
+      url: "https://otarcy.app/aio-ecommerce",
       publisher: {
         "@type": "Organization",
         name: "Otarcy",
-        url: "https://blackotarcyweb.vercel.app",
+        url: "https://otarcy.app",
       },
     },
   ],

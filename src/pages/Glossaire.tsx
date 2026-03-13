@@ -119,22 +119,22 @@ export default function Glossaire() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "DefinedTermSet",
-            "@id": "https://blackotarcyweb.vercel.app/glossaire#termset",
+            "@id": "https://otarcy.app/glossaire#termset",
             "name": "Glossaire AIO — Otarcy",
             "description": "Glossaire complet des termes de l'AI Optimization (AIO) par Otarcy, la référence française du référencement IA pour les PME.",
-            "url": "https://blackotarcyweb.vercel.app/glossaire",
+            "url": "https://otarcy.app/glossaire",
             "inLanguage": "fr",
             "publisher": {
               "@type": "Organization",
               "name": "Otarcy",
-              "url": "https://blackotarcyweb.vercel.app"
+              "url": "https://otarcy.app"
             },
             "hasDefinedTerm": TERMES.flatMap((g) =>
               g.items.map((item) => ({
                 "@type": "DefinedTerm",
                 "name": item.terme,
                 "description": item.definition,
-                "inDefinedTermSet": "https://blackotarcyweb.vercel.app/glossaire#termset",
+                "inDefinedTermSet": "https://otarcy.app/glossaire#termset",
               }))
             ),
           }),

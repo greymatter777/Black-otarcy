@@ -47,11 +47,11 @@ const schemaJsonLd = {
       name: "AIO pour les Agences Immobilières — Otarcy",
       description:
         "Guide complet d'AI Optimization pour les agences immobilières et agents indépendants. Apparaissez dans les recommandations de ChatGPT, Perplexity et Claude quand vos clients cherchent une agence.",
-      url: "https://blackotarcyweb.vercel.app/aio-immobilier",
+      url: "https://otarcy.app/aio-immobilier",
       publisher: {
         "@type": "Organization",
         name: "Otarcy",
-        url: "https://blackotarcyweb.vercel.app",
+        url: "https://otarcy.app",
       },
     },
   ],
