@@ -2,9 +2,10 @@
 
 ## Identité
 - **Produit** : AIO Brand Audit SaaS — "Optimisez votre marque pour les IAs"
-- **Site** : https://blackotarcyweb.vercel.app
+- **Site** : https://otarcy.app
 - **Repo GitHub** : https://github.com/greymatter777/Black-Otarcy
 - **Stack** : React 18 + TypeScript, Vite, Vercel, @supabase/supabase-js (auth + db), stripe, resend, jspdf, Groq (llama-3.3-70b-versatile)
+- **Domaine** : `otarcy.app` — acheté le 13/03/2026 sur Namecheap (~13$/an, renouvellement annuel)
 - **Prerendering** : `prerender.mjs` custom — 13 routes HTML statiques générées au build, crawlables sans JavaScript
 
 ---
@@ -121,7 +122,7 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - Graphique évolution des scores
 - Webhook Stripe en mode live (à configurer avant lancement public)
 - Image de couverture LinkedIn
-- Domaine `otarcy.ai` ou `otarcy.com` — `otarcy.fr` déjà pris — débloquer envoi Resend sans restriction
+- Resend : mettre à jour `from` → `newsletter@otarcy.app` dès que domaine vérifié dans Resend
 - Blog : 3 articles supplémentaires (objectif 4 articles Priorité 2 AIO Foundation)
 - Glossaire : +6 termes (24 → 30)
 - FAQ : +4 questions (16 → 20)
@@ -278,8 +279,8 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - ✅ Reset password
 
 ### Configuration Supabase
-- **Site URL** : `https://blackotarcyweb.vercel.app`
-- **Redirect URLs** : `https://blackotarcyweb.vercel.app/**` + `http://localhost:5173/**`
+- **Site URL** : `https://otarcy.app`
+- **Redirect URLs** : `https://otarcy.app/**` + `http://localhost:5173/**`
 
 ### Pattern auth frontend
 ```typescript
@@ -423,12 +424,13 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 22. **Prerendering custom** : `prerender.mjs` à la racine, exécuté après `vite build` — crée `dist/[route]/index.html` pour chaque route publique — compatible Vercel, zéro dépendance externe
 23. **vite-react-ssg incompatible** : nécessite réécriture des routes en format objet `RouteRecord[]` — incompatible avec `react-router-dom` JSX sans migration lourde
 24. **supabase.ts au build SSG** : le `throw new Error` sur variables manquantes bloque tout SSG/SSR — remplacer par des valeurs placeholder pour le build
-25. **`otarcy.fr` déjà pris** : appartient à une communauté nomade digitale sans rapport avec l'AIO — privilégier `otarcy.ai` (parfait pour le positionnement) ou `otarcy.com`
-26. **`otarcy.ai` et `otarcy.com`** : DNS ne résout pas → très probablement disponibles (à confirmer sur Namecheap ou Cloudflare avant achat)
+25. **`otarcy.fr` déjà pris** : appartient à une communauté nomade digitale — `otarcy.com` premium (+1000€) — `otarcy.ai` minimum 2 ans (~35-45€/an)
+26. **`otarcy.app` retenu** : Google Registry, ~13$/an, signal SaaS immédiat, aucun spéculateur — meilleur rapport qualité/prix
 27. **Blog avec Supabase** : stocker les articles en DB plutôt qu'en fichiers `.ts` — éditable sans redeploy, scalable à 24+ articles
 28. **`useReveal` et données async** : passer la dépendance de chargement au hook `useReveal(loading)` — sinon les éléments `.reveal` restent invisibles (chargés après le premier rendu)
 29. **`dist/` dans le repo** : toujours exclure via `.gitignore` — Vercel génère son propre build, inutile de versionner les assets compilés
 30. **Navbar inlinée dans `Index.tsx`** : pas de composant séparé — modifier directement le tableau des liens dans `Index.tsx`
+31. **Migration domaine** : `sed -i 's|ancien-domaine|nouveau-domaine|g'` sur tous les fichiers — vérifier index.html, prerender.mjs, tous les .tsx avec Schema.org + Supabase Auth Redirect URLs + Vercel Domains
 
 ---
 
@@ -443,7 +445,7 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 - Fetch dynamique des slugs blog depuis Supabase au build (si variables dispo)
 - Résultat : crawlers LLMs reçoivent du HTML complet avec contenu + Schema.org sans exécuter JavaScript
 - Compatible Vercel, zéro dépendance externe, zéro modification des composants React existants
-- Vérification : `view-source:https://blackotarcyweb.vercel.app/glossaire` → 132 lignes de HTML complet ✅
+- Vérification : `view-source:https://otarcy.app/glossaire` → 132 lignes de HTML complet ✅
 
 ### 11. Blog — `src/pages/Blog.tsx` + `src/pages/BlogPost.tsx`
 - Routes : `/blog` (liste) + `/blog/:slug` (article individuel) — 100% publiques
