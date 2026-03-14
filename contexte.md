@@ -118,15 +118,26 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - `/aio-rh`           → `src/pages/AioRh.tsx` — Schema.org ProfessionalService + FAQPage
 - `/aio-sante`        → `src/pages/AioSante.tsx` — Schema.org MedicalBusiness + FAQPage
 
+### ✅ Priorité 3 — Présence externe (session 14/03/2026)
+- **Google Business Profile** — créé, CID : `9805525438360950467`
+- **Wikidata** — élément créé, QID : `Q138666178` (déclarations complètes : P31, P495, P571, P159, P856, P4264, P2003)
+- **Schema.org `sameAs`** — mis à jour : GBP + Wikidata + Instagram `@otarcy.app` (était `@otarcy.web`)
+- **Improvmx** — 5 alias `@otarcy.app` configurés : `cedric@`, `contact@`, `hello@`, `support@`, `newsletter@`
+- **Capterra** — profil soumis via Gartner Digital Markets, validation en cours (3-7 jours)
+- **Stratégie mentions presse** — rédigée, emails prêts depuis `cedric@otarcy.app`
+
 ### ⬜ À implémenter
 - Graphique évolution des scores
-- Webhook Stripe en mode live (à configurer avant lancement public)
+- **Webhook Stripe en mode live** (priorité absolue avant lancement public)
 - Image de couverture LinkedIn
-- Resend : mettre à jour `from` → `newsletter@otarcy.app` dès que domaine vérifié dans Resend
+- Resend : vérifier domaine `otarcy.app` → changer `from` → `newsletter@otarcy.app` dans `newsletter.ts` et `digest.ts`
 - Blog : 3 articles supplémentaires (objectif 4 articles Priorité 2 AIO Foundation)
 - Glossaire : +6 termes (24 → 30)
 - FAQ : +4 questions (16 → 20)
-- Priorité 3 : Wikidata, Capterra FR, Google Business Profile, mentions presse
+- **Product Hunt** — lancer Otarcy (après Stripe live)
+- **AlternativeTo** — ajouter comme alternative à Semrush/Ahrefs (après Stripe live)
+- **G2** — créer profil produit (après Stripe live)
+- **Envoi pitchs presse** — Maddyness, Frenchweb, Siècle Digital (après Stripe live + 3 posts LinkedIn)
 
 ---
 
@@ -431,6 +442,13 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 29. **`dist/` dans le repo** : toujours exclure via `.gitignore` — Vercel génère son propre build, inutile de versionner les assets compilés
 30. **Navbar inlinée dans `Index.tsx`** : pas de composant séparé — modifier directement le tableau des liens dans `Index.tsx`
 31. **Migration domaine** : `sed -i 's|ancien-domaine|nouveau-domaine|g'` sur tous les fichiers — vérifier index.html, prerender.mjs, tous les .tsx avec Schema.org + Supabase Auth Redirect URLs + Vercel Domains
+32. **Google Business Profile** : CID récupérable dans les paramètres avancés de la fiche — format numérique long — à ajouter dans `sameAs` Schema.org sous la forme `https://www.google.com/maps?cid=XXXX`
+33. **Wikidata** : créer le compte avec email perso, faire une contribution mineure avant de créer un élément (anti-spam) — QID format `Q` + chiffres — à ajouter dans `sameAs` Schema.org
+34. **Éléments protégés Wikidata** : France (Q142), Bordeaux (Q13280) non modifiables pour les nouveaux comptes — utiliser des éléments moins consultés (communes, entreprises locales)
+35. **Improvmx** : plan gratuit = 25 alias sur son propre domaine, redirection vers Gmail — idéal pour avoir des adresses `@otarcy.app` sans coût — nécessite MX records + TXT SPF dans Namecheap
+36. **MX records Namecheap** : activer via "Paramètres du courrier" → "MX personnalisé" — les éléments très populaires (France, grandes villes) sont en lecture seule pour les nouveaux comptes Wikidata
+37. **Capterra/Gartner** : soumission via https://digitalmarkets.gartner.com/get-listed/start — scrape automatique du site si Schema.org + prerendering bien configurés — nécessite email pro `@domaine`
+38. **Instagram handle** : mis à jour → `@otarcy.app` (https://www.instagram.com/otarcy.app) — mettre à jour dans SideLeft, Footer, Schema.org `sameAs`
 
 ---
 
