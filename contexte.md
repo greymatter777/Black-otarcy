@@ -123,7 +123,7 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - **Wikidata** — élément créé, QID : `Q138666178` (déclarations complètes : P31, P495, P571, P159, P856, P4264, P2003)
 - **Schema.org `sameAs`** — mis à jour : GBP + Wikidata + Instagram `@otarcy.app` (était `@otarcy.web`)
 - **Improvmx** — 5 alias `@otarcy.app` configurés : `cedric@`, `contact@`, `hello@`, `support@`, `newsletter@`
-- **Capterra** — profil soumis via Gartner Digital Markets, validation en cours (3-7 jours)
+- **Capterra** — profil soumis via Gartner Digital Markets, **refusé** (17/03/2026) — motif : catégorie "AIO" non reconnue par Gartner. Re-soumission prévue sous catégorie existante (Brand Management / Marketing Analytics) après traction initiale.
 - **Stratégie mentions presse** — rédigée, emails prêts depuis `cedric@otarcy.app`
 
 ### ⬜ À implémenter
@@ -141,7 +141,18 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 
 ---
 
-## Modifications UI (session 11/03/2026)
+## Modifications UI (session 17/03/2026)
+
+### Navbar — Responsive Mobile
+- Ajout state `mobileOpen` (boolean) dans `Navbar`
+- Breakpoint mobile : `768px` via balise `<style>` injectée — `.nav-desktop` masqué, `.nav-hamburger` affiché
+- Bouton **hamburger ☰** — 3 barres animées (croix ✕ à l'ouverture), couleur `#a3e635` quand actif
+- Overlay plein écran `#0a0a0a` au clic — tous les liens + secteurs dépliés + auth
+- Scroll de la page bloqué (`overflow: hidden`) pendant que le menu est ouvert
+- Fermeture automatique au clic sur n'importe quel lien
+- Desktop : comportement inchangé
+
+---
 
 ### Navbar — Dropdown Secteurs
 - Nouveau state `secteurOpen` (boolean) dans `Navbar`
@@ -449,6 +460,7 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 36. **MX records Namecheap** : activer via "Paramètres du courrier" → "MX personnalisé" — les éléments très populaires (France, grandes villes) sont en lecture seule pour les nouveaux comptes Wikidata
 37. **Capterra/Gartner** : soumission via https://digitalmarkets.gartner.com/get-listed/start — scrape automatique du site si Schema.org + prerendering bien configurés — nécessite email pro `@domaine`
 38. **Instagram handle** : mis à jour → `@otarcy.app` (https://www.instagram.com/otarcy.app) — mettre à jour dans SideLeft, Footer, Schema.org `sameAs`
+39. **Navbar responsive mobile** : breakpoint `768px` via `<style>` injectée dans le composant — `.nav-desktop` / `.nav-hamburger` — overlay plein écran avec menu hamburger animé — bloquer `document.body.style.overflow` pendant l'ouverture
 
 ---
 
