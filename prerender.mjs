@@ -86,3 +86,49 @@ if (blogRoutes.length > 0) {
   console.log(`📝 ${blogRoutes.length} article(s) blog inclus`)
 }
 console.log('📋 Les crawlers LLMs recevront maintenant du HTML complet pour chaque route.')
+
+// ─── GÉNÉRATION DU SITEMAP XML ────────────────────────────────────────────────
+const BASE_URL = 'https://otarcy.app'
+
+// Priorités et fréquences par route
+const ROUTE_META = {
+  '/':               { priority: '1.0', changefreq: 'weekly'  },
+  '/pricing':        { priority: '0.9', changefreq: 'monthly' },
+  '/blog':           { priority: '0.8', changefreq: 'weekly'  },
+  '/glossaire':      { priority: '0.7', changefreq: 'monthly' },
+  '/faq':            { priority: '0.7', changefreq: 'monthly' },
+  '/aio-coaching':   { priority: '0.8', changefreq: 'monthly' },
+  '/aio-ecommerce':  { priority: '0.8', changefreq: 'monthly' },
+  '/aio-immobilier': { priority: '0.8', changefreq: 'monthly' },
+  '/aio-restauration':{ priority: '0.8', changefreq: 'monthly' },
+  '/aio-rh':         { priority: '0.8', changefreq: 'monthly' },
+  '/aio-sante':      { priority: '0.8', changefreq: 'monthly' },
+}
+
+// Routes exclues du sitemap (pas de valeur SEO)
+const EXCLUDED = new Set(['/login', '/reset-password'])
+
+const today = new Date().toISOString().split('T')[0]
+
+const sitemapRoutes = allRoutes.filter(r => !EXCLUDED.has(r))
+
+const urlEntries = sitemapRoutes.map(route => {
+  const meta = ROUTE_META[route] ?? { priority: '0.6', changefreq: 'monthly' }
+  return `  <url>
+    <loc>${BASE_URL}${route}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${meta.changefreq}</changefreq>
+    <priority>${meta.priority}</priority>
+  </url>`
+}).join('\n')
+
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries}
+</urlset>
+`
+
+const sitemapPath = path.join(distDir, 'sitemap.xml')
+fs.writeFileSync(sitemapPath, sitemapXml, 'utf-8')
+console.log(`\n🗺️  sitemap.xml généré → ${sitemapRoutes.length} URLs`)
+console.log(`📍 ${BASE_URL}/sitemap.xml`)
