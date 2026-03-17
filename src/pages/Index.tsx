@@ -32,6 +32,7 @@ const secteurLinks = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [secteurOpen, setSecteurOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -41,7 +42,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Ferme le dropdown si clic en dehors
+  // Ferme le dropdown secteurs si clic en dehors
   useEffect(() => {
     if (!secteurOpen) return;
     const handler = () => setSecteurOpen(false);
@@ -49,121 +50,193 @@ const Navbar = () => {
     return () => document.removeEventListener("click", handler);
   }, [secteurOpen]);
 
+  // Bloque le scroll quand le menu mobile est ouvert
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
+  const navLinks = [
+    { label: "AIO", to: "/aio-report", highlight: true },
+    { label: "À PROPOS", to: "#about" },
+    { label: "NEWSLETTER", to: "#newsletter" },
+    { label: "AUDIT", to: "#audit" },
+    { label: "TARIFS", to: "/pricing" },
+    { label: "BLOG", to: "/blog" },
+  ];
+
+  const handleScrollLink = (id: string) => {
+    setMobileOpen(false);
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 100);
+  };
+
   return (
-    <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "28px 36px",
-      background: scrolled ? "rgba(15,15,15,0.92)" : "rgba(15,15,15,0.6)",
-      backdropFilter: "blur(12px)",
-      borderBottom: "1px solid rgba(255,255,255,0.04)",
-      transition: "background 0.4s",
-    }}>
-      <Link to="/" style={{ display: "flex", flexDirection: "column", lineHeight: 0.9, textDecoration: "none" }}>
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#f0f0f0" }}>OT</span>
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#7a7a7a" }}>CY</span>
-      </Link>
+    <>
+      {/* Styles responsive injectés une seule fois */}
+      <style>{`
+        .nav-desktop { display: flex; }
+        .nav-hamburger { display: none; }
+        @media (max-width: 768px) {
+          .nav-desktop { display: none !important; }
+          .nav-hamburger { display: flex !important; }
+        }
+      `}</style>
 
-      <div style={{ display: "flex", gap: "28px", alignItems: "center" }}>
-        {[
-          { label: "AIO", to: "/aio-report", highlight: true },
-          { label: "À PROPOS", to: "#about" },
-          { label: "NEWSLETTER", to: "#newsletter" },
-          { label: "AUDIT", to: "#audit" },
-          { label: "TARIFS", to: "/pricing" },
-          { label: "BLOG", to: "/blog" },
-        ].map((item) => (
-          item.to.startsWith("#") ? (
-            <button key={item.label} type="button"
-              onClick={() => document.getElementById(item.to.replace("#", ""))?.scrollIntoView({ behavior: "smooth" })}
-              style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: "#7a7a7a", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "20px 24px",
+        background: scrolled ? "rgba(15,15,15,0.97)" : "rgba(15,15,15,0.6)",
+        backdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        transition: "background 0.4s",
+      }}>
+        {/* Logo */}
+        <Link to="/" style={{ display: "flex", flexDirection: "column", lineHeight: 0.9, textDecoration: "none" }}>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#f0f0f0" }}>OT</span>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.15rem", letterSpacing: "0.15em", color: "#7a7a7a" }}>CY</span>
+        </Link>
+
+        {/* ── DESKTOP NAV ── */}
+        <div className="nav-desktop" style={{ gap: "28px", alignItems: "center" }}>
+          {navLinks.map((item) => (
+            item.to.startsWith("#") ? (
+              <button key={item.label} type="button"
+                onClick={() => handleScrollLink(item.to.replace("#", ""))}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: "#7a7a7a", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+              >{item.label}</button>
+            ) : (
+              <Link key={item.label} to={item.to}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: item.highlight ? "#a3e635" : "#7a7a7a", fontWeight: 500, textDecoration: "none", transition: "color 0.3s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = item.highlight ? "#a3e635" : "#7a7a7a")}
+              >{item.label}</Link>
+            )
+          ))}
+
+          {/* Dropdown Secteurs desktop */}
+          <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
+            <button type="button" onClick={() => setSecteurOpen((v) => !v)}
+              style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: secteurOpen ? "#a3e635" : "#7a7a7a", fontWeight: 500, background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s", display: "flex", alignItems: "center", gap: "5px" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
-            >{item.label}</button>
-          ) : (
-            <Link key={item.label} to={item.to} style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em", color: item.highlight ? "#a3e635" : "#7a7a7a", fontWeight: 500, textDecoration: "none", transition: "color 0.3s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = item.highlight ? "#a3e635" : "#7a7a7a")}
-            >{item.label}</Link>
-          )
-        ))}
+              onMouseLeave={(e) => (e.currentTarget.style.color = secteurOpen ? "#a3e635" : "#7a7a7a")}
+            >
+              SECTEURS
+              <span style={{ fontSize: "0.5rem", transition: "transform 0.2s", display: "inline-block", transform: secteurOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+            </button>
+            {secteurOpen && (
+              <div style={{ position: "absolute", top: "calc(100% + 14px)", right: 0, background: "#0f0f0f", border: "1px solid #2a2a2a", minWidth: "200px", zIndex: 200 }}>
+                {secteurLinks.map((s) => (
+                  <Link key={s.to} to={s.to} onClick={() => setSecteurOpen(false)}
+                    style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem", letterSpacing: "0.12em", color: "#7a7a7a", textDecoration: "none", padding: "10px 16px", borderBottom: "1px solid #1a1a1a", transition: "color 0.2s, background 0.2s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#a3e635"; (e.currentTarget as HTMLAnchorElement).style.background = "#161616"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#7a7a7a"; (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+                  >{s.label}</Link>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* Dropdown Secteurs */}
-        <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => setSecteurOpen((v) => !v)}
-            style={{
-              fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.2em",
-              color: secteurOpen ? "#a3e635" : "#7a7a7a", fontWeight: 500,
-              background: "transparent", border: "none", cursor: "pointer",
-              transition: "color 0.3s", display: "flex", alignItems: "center", gap: "5px",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = secteurOpen ? "#a3e635" : "#7a7a7a")}
-          >
-            SECTEURS
-            <span style={{ fontSize: "0.5rem", transition: "transform 0.2s", display: "inline-block", transform: secteurOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
-          </button>
-
-          {secteurOpen && (
-            <div style={{
-              position: "absolute", top: "calc(100% + 14px)", right: 0,
-              background: "#0f0f0f", border: "1px solid #2a2a2a",
-              minWidth: "200px", zIndex: 200,
-            }}>
-              {secteurLinks.map((s) => (
-                <Link
-                  key={s.to}
-                  to={s.to}
-                  onClick={() => setSecteurOpen(false)}
-                  style={{
-                    display: "block",
-                    fontFamily: "'Raleway', sans-serif", fontSize: "0.65rem",
-                    letterSpacing: "0.12em", color: "#7a7a7a",
-                    textDecoration: "none", padding: "10px 16px",
-                    borderBottom: "1px solid #1a1a1a",
-                    transition: "color 0.2s, background 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#a3e635";
-                    (e.currentTarget as HTMLAnchorElement).style.background = "#161616";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#7a7a7a";
-                    (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
-                  }}
-                >
-                  {s.label}
-                </Link>
-              ))}
+          {/* Auth desktop */}
+          {user ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <Link to="/dashboard"
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.15em", color: "#7a7a7a", textDecoration: "none", transition: "color 0.3s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+              >{user?.user_metadata?.full_name ?? user?.email}</Link>
+              <button type="button" onClick={() => signOut().then(() => navigate("/login"))}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#4a4a4a", background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
+              >Déconnexion</button>
             </div>
+          ) : (
+            <button type="button" onClick={() => navigate("/login")}
+              style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "7px 16px", border: "1px solid #3a3a3a", background: "transparent", color: "#e8e8e8", cursor: "pointer", transition: "border-color 0.3s" }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; }}
+            >Connexion</button>
           )}
         </div>
 
-        {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <Link to="/dashboard" style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.15em", color: "#7a7a7a", textDecoration: "none", transition: "color 0.3s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
-            >
-              {user?.user_metadata?.full_name ?? user?.email}
-            </Link>
-            <button type="button" onClick={() => signOut().then(() => navigate("/login"))}
-              style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#4a4a4a", background: "transparent", border: "none", cursor: "pointer", transition: "color 0.3s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#4a4a4a")}
-            >Déconnexion</button>
+        {/* ── HAMBURGER BUTTON (mobile uniquement) ── */}
+        <button
+          className="nav-hamburger"
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          style={{ flexDirection: "column", gap: "5px", background: "transparent", border: "none", cursor: "pointer", padding: "4px", zIndex: 110 }}
+          aria-label="Menu"
+        >
+          <span style={{ display: "block", width: "22px", height: "1.5px", background: mobileOpen ? "#a3e635" : "#e8e8e8", transition: "transform 0.3s, opacity 0.3s", transform: mobileOpen ? "translateY(6.5px) rotate(45deg)" : "none" }} />
+          <span style={{ display: "block", width: "22px", height: "1.5px", background: "#e8e8e8", transition: "opacity 0.3s", opacity: mobileOpen ? 0 : 1 }} />
+          <span style={{ display: "block", width: "22px", height: "1.5px", background: mobileOpen ? "#a3e635" : "#e8e8e8", transition: "transform 0.3s, opacity 0.3s", transform: mobileOpen ? "translateY(-6.5px) rotate(-45deg)" : "none" }} />
+        </button>
+      </nav>
+
+      {/* ── MOBILE MENU OVERLAY ── */}
+      {mobileOpen && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "#0a0a0a", zIndex: 99,
+          display: "flex", flexDirection: "column",
+          padding: "100px 32px 48px",
+          overflowY: "auto",
+        }}>
+          {/* Liens principaux */}
+          {navLinks.map((item) => (
+            item.to.startsWith("#") ? (
+              <button key={item.label} type="button"
+                onClick={() => handleScrollLink(item.to.replace("#", ""))}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.8rem", letterSpacing: "0.25em", color: "#7a7a7a", fontWeight: 500, background: "transparent", border: "none", borderBottom: "1px solid #1a1a1a", cursor: "pointer", padding: "18px 0", textAlign: "left", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8e8e8")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#7a7a7a")}
+              >{item.label}</button>
+            ) : (
+              <Link key={item.label} to={item.to}
+                onClick={() => setMobileOpen(false)}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.8rem", letterSpacing: "0.25em", color: item.highlight ? "#a3e635" : "#7a7a7a", fontWeight: 500, textDecoration: "none", borderBottom: "1px solid #1a1a1a", padding: "18px 0", display: "block", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f0f0f0")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = item.highlight ? "#a3e635" : "#7a7a7a")}
+              >{item.label}</Link>
+            )
+          ))}
+
+          {/* Secteurs dans le menu mobile */}
+          <div style={{ borderBottom: "1px solid #1a1a1a", padding: "18px 0" }}>
+            <p style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.7rem", letterSpacing: "0.25em", color: "#3a3a3a", marginBottom: "14px" }}>SECTEURS</p>
+            {secteurLinks.map((s) => (
+              <Link key={s.to} to={s.to}
+                onClick={() => setMobileOpen(false)}
+                style={{ display: "block", fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", letterSpacing: "0.1em", color: "#5a5a5a", textDecoration: "none", padding: "8px 0 8px 12px", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#a3e635")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#5a5a5a")}
+              >{s.label}</Link>
+            ))}
           </div>
-        ) : (
-          <button type="button" onClick={() => navigate("/login")}
-            style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "7px 16px", border: "1px solid #3a3a3a", background: "transparent", color: "#e8e8e8", cursor: "pointer", transition: "border-color 0.3s" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e8e8e8"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#3a3a3a"; }}
-          >Connexion</button>
-        )}
-      </div>
-    </nav>
+
+          {/* Auth mobile */}
+          <div style={{ marginTop: "32px" }}>
+            {user ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <Link to="/dashboard" onClick={() => setMobileOpen(false)}
+                  style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", letterSpacing: "0.15em", color: "#7a7a7a", textDecoration: "none" }}
+                >{user?.user_metadata?.full_name ?? user?.email}</Link>
+                <button type="button" onClick={() => { setMobileOpen(false); signOut().then(() => navigate("/login")); }}
+                  style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.66rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#ef4444", background: "transparent", border: "1px solid #3a1a1a", padding: "10px 16px", cursor: "pointer", textAlign: "left" }}
+                >Déconnexion</button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => { setMobileOpen(false); navigate("/login"); }}
+                style={{ fontFamily: "'Raleway', sans-serif", fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", padding: "12px 24px", border: "1px solid #3a3a3a", background: "transparent", color: "#e8e8e8", cursor: "pointer", width: "100%" }}
+              >Connexion</button>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
