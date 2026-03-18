@@ -6,7 +6,7 @@
 - **Repo GitHub** : https://github.com/greymatter777/Black-Otarcy
 - **Stack** : React 18 + TypeScript, Vite, Vercel, @supabase/supabase-js (auth + db), stripe, resend, jspdf, Groq (llama-3.3-70b-versatile)
 - **Domaine** : `otarcy.app` — acheté le 13/03/2026 sur Namecheap (~13$/an, renouvellement annuel)
-- **Prerendering** : `prerender.mjs` custom — 13 routes HTML statiques générées au build, crawlables sans JavaScript
+- **Prerendering** : `prerender.mjs` custom — 13 routes HTML statiques générées au build, crawlables sans JavaScript + génération `sitemap.xml` automatique
 
 ---
 
@@ -125,6 +125,7 @@ prerender.mjs             — Script prerendering statique (exécuté après vit
 - **Improvmx** — 5 alias `@otarcy.app` configurés : `cedric@`, `contact@`, `hello@`, `support@`, `newsletter@`
 - **Capterra** — profil soumis via Gartner Digital Markets, **refusé** (17/03/2026) — motif : catégorie "AIO" non reconnue par Gartner. Re-soumission prévue sous catégorie existante (Brand Management / Marketing Analytics) après traction initiale.
 - **Stratégie mentions presse** — rédigée, emails prêts depuis `cedric@otarcy.app`
+- **Google Search Console** — domaine `otarcy.app` validé via DNS TXT (Namecheap), `sitemap.xml` soumis le 18/03/2026, 12 URLs indexées, indexation manuelle demandée pour les 12 URLs prioritaires
 
 ### ⬜ À implémenter
 - Graphique évolution des scores
@@ -420,7 +421,28 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 
 ---
 
-## Leçons apprises
+## Session 18/03/2026
+
+### sitemap.xml — génération automatique
+- `prerender.mjs` mis à jour : génère `dist/sitemap.xml` après les pages HTML
+- 12 URLs (hors `/login` et `/reset-password`), `<priority>` et `<changefreq>` configurées par route
+- Slugs blog fetched dynamiquement depuis Supabase (même logique que le prerendering)
+- Deploy Vercel déclenché via `git add . && git commit && git push`
+- Vérification : `https://otarcy.app/sitemap.xml` ✅
+
+### Google Search Console
+- Domaine `otarcy.app` validé via enregistrement DNS TXT dans Namecheap
+- `sitemap.xml` soumis — 12 URLs acceptées
+- Indexation manuelle demandée pour les 12 URLs prioritaires via "URL Inspection"
+- Premières indexations attendues sous 24-48h
+
+### Stripe live — décision reportée
+- Stripe live non activé : SIRET en cours d'acquisition
+- Structure OÜ estonienne analysée — avantage fiscal réel = report d'imposition, pas réduction immédiate
+- Simulation dividende 10 000 € : net estimé ~6 820 € (vs ~7 000 € flat tax française directe)
+- Action : activer Stripe live après obtention SIRET + ajout page CGV sur le site
+
+---
 
 1. **Ne jamais pousher node_modules depuis Windows** — permissions binaires cassées sur Linux
 2. **Vercel ignore les imports relatifs hors `/api/`** — helpers inlinés dans chaque fichier
@@ -461,6 +483,9 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 37. **Capterra/Gartner** : soumission via https://digitalmarkets.gartner.com/get-listed/start — scrape automatique du site si Schema.org + prerendering bien configurés — nécessite email pro `@domaine`
 38. **Instagram handle** : mis à jour → `@otarcy.app` (https://www.instagram.com/otarcy.app) — mettre à jour dans SideLeft, Footer, Schema.org `sameAs`
 39. **Navbar responsive mobile** : breakpoint `768px` via `<style>` injectée dans le composant — `.nav-desktop` / `.nav-hamburger` — overlay plein écran avec menu hamburger animé — bloquer `document.body.style.overflow` pendant l'ouverture
+40. **sitemap.xml** : généré par `prerender.mjs` dans `dist/` à chaque build — `/login` et `/reset-password` exclus — slugs blog inclus dynamiquement via Supabase — soumis à Google Search Console via `https://otarcy.app/sitemap.xml`
+41. **Google Search Console validation** : méthode DNS TXT dans Namecheap (Advanced DNS → enregistrement TXT `@` avec valeur `google-site-verification=...`) — propagation quasi-instantanée — méthode la plus robuste car indépendante du code
+42. **OÜ estonienne et fiscalité française** : la e-résidence ne crée pas de résidence fiscale estonienne — la convention franco-estonienne évite la double imposition mais ne réduit pas la charge globale pour un résident français — avantage réel = report d'imposition tant qu'on ne se verse pas de dividendes
 
 ---
 
@@ -473,9 +498,11 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 - Routes prerenderées : `/`, `/pricing`, `/glossaire`, `/faq`, `/login`, `/reset-password`, `/blog`, `/aio-coaching`, `/aio-ecommerce`, `/aio-immobilier`, `/aio-restauration`, `/aio-rh`, `/aio-sante`
 - Routes exclues (privées) : `/dashboard`, `/aio-report`
 - Fetch dynamique des slugs blog depuis Supabase au build (si variables dispo)
+- **Génère aussi `dist/sitemap.xml`** — 12 URLs (hors `/login` et `/reset-password`), `<priority>` et `<changefreq>` par route, `<lastmod>` = date du build, slugs blog inclus dynamiquement
 - Résultat : crawlers LLMs reçoivent du HTML complet avec contenu + Schema.org sans exécuter JavaScript
 - Compatible Vercel, zéro dépendance externe, zéro modification des composants React existants
 - Vérification : `view-source:https://otarcy.app/glossaire` → 132 lignes de HTML complet ✅
+- Vérification sitemap : `https://otarcy.app/sitemap.xml` ✅
 
 ### 11. Blog — `src/pages/Blog.tsx` + `src/pages/BlogPost.tsx`
 - Routes : `/blog` (liste) + `/blog/:slug` (article individuel) — 100% publiques
