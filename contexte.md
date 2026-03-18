@@ -442,6 +442,19 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 - Simulation dividende 10 000 € : net estimé ~6 820 € (vs ~7 000 € flat tax française directe)
 - Action : activer Stripe live après obtention SIRET + ajout page CGV sur le site
 
+### Stratégie fiscale — décision arrêtée (18/03/2026)
+- **Profil** : résident fiscal français, origine béninoise, titre de séjour étudiant, PACS en préparation avec Lucie (française)
+- **Principe clé** : c'est la résidence fiscale personnelle (pas le siège social) qui détermine l'imposition → France impose tous les revenus mondiaux
+- **OÜ estonienne et Corp Delaware écartées** : coûts de structure (~2 500–4 000€/an) pour zéro avantage fiscal réel tant que la résidence est en France — risque > bénéfice
+- **URSSAF** : cotisations (~22% AE) = salaire différé (sécu, retraite) — pas "perdu", souvent équivalent aux assurances privées à l'étranger
+- **Roadmap fiscale retenue** :
+  1. **Maintenant** → Auto-entrepreneur : ~22% charges, zéro frais de structure, SIRET rapide → activer Stripe live
+  2. **~3 000€/mois de CA** → SASU à l'IS : flat tax 30% sur dividendes, déduction charges tech (Vercel, Supabase, Groq, Stripe...), CIR/CII potentiel
+  3. **Bénéfices réguliers + second projet** → Holding SASU : régime mère-fille (~1,67% IS sur remontée dividendes), réinvestissement optimisé
+  4. **Long terme** : optimisation internationale uniquement si changement réel de résidence fiscale (+183j/an hors France, centre de vie déplacé)
+- **Levier CIR/CII** : à explorer dès la SASU — Otarcy éligible potentiellement au Crédit Impôt Innovation (jusqu'à 30% des dépenses R&D)
+- **ACRE** : exonération partielle cotisations la 1ère année à demander à la création
+
 ---
 
 1. **Ne jamais pousher node_modules depuis Windows** — permissions binaires cassées sur Linux
@@ -486,6 +499,8 @@ DIGEST_RECIPIENT_EMAIL            ← ryansessou@gmail.com (= email compte Resen
 40. **sitemap.xml** : généré par `prerender.mjs` dans `dist/` à chaque build — `/login` et `/reset-password` exclus — slugs blog inclus dynamiquement via Supabase — soumis à Google Search Console via `https://otarcy.app/sitemap.xml`
 41. **Google Search Console validation** : méthode DNS TXT dans Namecheap (Advanced DNS → enregistrement TXT `@` avec valeur `google-site-verification=...`) — propagation quasi-instantanée — méthode la plus robuste car indépendante du code
 42. **OÜ estonienne et fiscalité française** : la e-résidence ne crée pas de résidence fiscale estonienne — la convention franco-estonienne évite la double imposition mais ne réduit pas la charge globale pour un résident français — avantage réel = report d'imposition tant qu'on ne se verse pas de dividendes
+43. **Structures étrangères inutiles (résident FR)** : OÜ estonienne, Corp Delaware, holding offshore → zéro avantage fiscal tant que la résidence personnelle est en France — coûts de structure réels sans bénéfice — risque requalification établissement stable si direction effective depuis la France
+44. **Roadmap fiscale Otarcy** : Auto-entrepreneur (maintenant) → SASU IS + flat tax 30% (~3K€/mois CA) → Holding SASU (multi-projets/bénéfices réguliers) — voir section "Stratégie fiscale" dans le bloc Stripe live pour le détail complet
 
 ---
 
